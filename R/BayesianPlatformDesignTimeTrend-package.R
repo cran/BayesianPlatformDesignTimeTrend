@@ -1,0 +1,19 @@
+#' The 'BayesianPlatformDesignTimeTrend' package.
+#'
+#' @description This package simulates the multi-arm multi-stage or platform trial with bayesian approach using the 'rstan' package, which provides the R interface for to the stan.
+#' The package uses Thall's and Trippa's randomisation approach for Bayesian adaptive randomisation.
+#' In addition, the time trend problem of platform trial can be studied in this package.
+#' There is a demo for multi-arm multi-stage trial for two different null scenario in this package.
+#'
+#' @docType package
+#' @name BayesianPlatformDesignTimeTrend-package
+#' @aliases BayesianPlatformDesignTimeTrend
+#' @useDynLib BayesianPlatformDesignTimeTrend, .registration = TRUE
+#' @import methods
+#' @import Rcpp
+#' @importFrom rstan sampling
+#'
+#' @references
+#' Stan Development Team (2020). RStan: the R interface to Stan. R package version 2.21.2. https://mc-stan.org
+#'
+NULL

@@ -1,0 +1,361 @@
+---
+title: "MAMS-trial-simulation-tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{MAMS-trial-simulation-tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(BayesianPlatformDesignTimeTrend)
+```
+## Four arm trial simulation
+
+The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening}} and MAMS-CutoffScreening-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentailly during the simulation. 
+In this tutorial, the example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero first and then set to be 0.5 to study the impact of time trend on different evaluation metrics. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
+
+Firstly, We investigate the family wise error rate (FWER) for different time trend strength and how model with stage effect help control the family wise error rate. The cutoff value was screened for null scenario using model only main effect in order to control the FWER under 0.1. The false positive rate is 0.037 equally for each treatment - control comparison.
+```{r}
+
+ntrials = 1000 # Number of trial replicates
+ns = seq(120,600,120) # Sequence of total number of accrued patients at each interim analysis
+null.reponse.prob = 0.4
+alt.response.prob = 0.6
+
+# We investigate the type I error rate for different time trend strength
+null.scenario = matrix(
+  c(
+    null.reponse.prob,
+    null.reponse.prob,
+    null.reponse.prob,
+    null.reponse.prob
+  ),
+  nrow = 1,
+  ncol = 4,
+  byrow = T
+)
+# alt.scenario = matrix(c(null.reponse.prob,null.reponse.prob,null.reponse.prob,null.reponse.prob,
+#                     null.reponse.prob,alt.response.prob,null.reponse.prob,null.reponse.prob,
+#                     null.reponse.prob,alt.response.prob,alt.response.prob,null.reponse.prob,
+#                     null.reponse.prob,alt.response.prob,alt.response.prob,alt.response.prob), nrow=3, ncol = 4,byrow=T)
+model = "tlr" #logistic model
+max.ar = 0.75  #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+#------------Select the data generation randomisation methods-------
+rand.type = "Urn" # Urn design
+max.deviation = 3 # The recommended value for the tuning parameter in the Urn design
+
+# Require multiple cores for parallel running
+cl = 2
+
+# Set the model we want to use and the time trend effect for each model used.
+# Here the main model will be used twice for two different strength of time trend c(0,0,0,0) and c(1,1,1,1) to investigate how time trend affect the evaluation metrics in BAR setting.
+# Then the main + stage_continuous model which is the treatment effect + stage effect model will be applied for strength equal c(1,1,1,1) to investigate how the main + stage effect model improve the evaluation metrics.
+reg.inf = c("main", "main", "main + stage_continuous")
+trend.effect = matrix(
+  c(0, 0, 0, 0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1),
+  ncol = 4,
+  nrow = 3,
+  byrow = T
+)
+
+#
+cutoffearly = matrix(rep(0.994, dim(null.scenario)[1]), ncol = 1)
+
+K = dim(null.scenario)[2]
+print(
+  paste0(
+    "Start trial simulation. This is a ",
+    K,
+    "-arm trial simulation. There are one null scenario and ",
+    K - 1 ,
+    " alternative scenarios. There are ",
+    K ,
+    " rounds."
+  )
+)
+cutoffindex = 1
+```
+
+```{r, eval=FALSE}
+result = {
+  
+}
+OPC_null = {
+  
+}
+for (i in 1:dim(null.scenario)[1]) {
+  trendindex = 1
+  for (j in 1:length(reg.inf)){
+    restlr = Trial.simulation(
+      ntrials = ntrials,
+      # Number of trial replicates
+      trial.fun = simulatetrial,
+      # Call the main function
+      input.info = list(
+        response.probs = null.scenario[cutoffindex, ],
+        #The scenario vector in this round
+        ns = ns,
+        # Sequence of total number of accrued patients at each interim analysis
+        max.ar =  max.ar,
+        #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+        rand.type = rand.type,
+        # Which randomisation methods in data generation.
+        max.deviation = max.deviation,
+        # The recommended value for the tuning parameter in the Urn design
+        model.inf = list(
+          model = model,
+          #Use which model?
+          ibb.inf = list(
+            #independent beta-binomial model which can be used only for no time trend simulation
+            pi.star = 0.5,
+            # beta prior mean
+            pess = 2,
+            # beta prior effective sample size
+            betabinomialmodel = ibetabinomial.post # beta-binomial model for posterior estimation
+          ),
+          tlr.inf = list(
+            beta0_prior_mu = 0,
+            # Stan logistic model t prior location
+            beta1_prior_mu = 0,
+            # Stan logistic model t prior location
+            beta0_prior_sigma = 2.5,
+            # Stan logistic model t prior sigma
+            beta1_prior_sigma = 2.5,
+            # Stan logistic model t prior sigma
+            beta0_df = 7,
+            # Stan logistic model t prior degree of freedom
+            beta1_df = 7,
+            # Stan logistic model t prior degree of freedom
+            reg.inf =  reg.inf[trendindex],
+            # The model we want to use
+            variable.inf = "Fixeffect" # Use fix effect logistic model
+          )
+        ),
+        Stopbound.inf = Stopboundinf(
+          Stop.type = "Early-Pocock",
+          # Use Pocock like early stopping boundary
+          Boundary.type = "Symmetric",
+          # Use Symmetric boundary where cutoff value for efficacy boundary and futility boundary sum up to 1
+          cutoff = c(cutoffearly[cutoffindex, 1], 1 - cutoffearly[cutoffindex, 1]) # The cutoff value for stopping boundary
+        ),
+        Random.inf = list(
+          Fixratio = FALSE,
+          # Do not use fix ratio allocation
+          Fixratiocontrol = NA,
+          # Do not use fix ratio allocation
+          BARmethod = "Thall",
+          # Use Thall's Bayesian adaptive randomisation approach
+          Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1) # Specified the tunning parameter value for fixed tuning parameter
+        ),
+        trend.inf = list(
+          trend.type = "step",
+          # Linear time trend pattern
+          trend.effect = trend.effect[trendindex, ],
+          # Stength of time trend effect
+          trend_add_or_multip = "mult" # Multiplicative time trend effect on response probability
+        )
+      ),
+      cl = 2 # 2 cores required
+    )
+
+  trendindex = trendindex + 1
+  # The result list can be used for plotting and the OPC table is the summary evaluaton metrics for each scenario
+  result = c(result, restlr$result)
+  OPC_null = rbind(OPC_null, restlr$OPC)
+  }
+  cutoffindex = cutoffindex + 1
+}
+```
+```{r}
+print("Finished null scenario study")
+save_data = FALSE
+if (isTRUE(save_data)) {
+  save(result, file = restlr$Nameofsaveddata$nameData)
+  save(OPC_null, file = restlr$Nameofsaveddata$nameTable)
+}
+
+```
+Present the evaluation metrics for null scenario. The FWER is 0.1 when there is no time trend. FWER inflated to 0.1296 when there is a step time trend pattern and modeled by main fixed effect model. The main effect plus stage effect model controls the FWER again under 0.1.
+```{r}
+# Characteristic table
+print(OPC_null)
+```
+
+Then, We investigate the other evaluation metrics for alternative scenario with different time trend strength. The cutoff value was the same as the value in precious example since the control arm response probability in alternative scenario are the same as that in null scenario.
+
+```{r}
+
+ntrials = 1000 # Number of trial replicates
+ns = seq(120,600,120) # Sequence of total number of accrued patients at each interim analysis
+null.reponse.prob = 0.4
+alt.response.prob = 0.6
+
+# We investigate the type I error rate for different time trend strength
+alt.scenario = matrix(
+  c(
+    null.reponse.prob,
+    alt.response.prob,
+    null.reponse.prob,
+    null.reponse.prob,
+    null.reponse.prob,
+    alt.response.prob,
+    alt.response.prob,
+    null.reponse.prob,
+    null.reponse.prob,
+    alt.response.prob,
+    alt.response.prob,
+    alt.response.prob
+  ),
+  nrow = 3,
+  ncol = 4,
+  byrow = T
+)
+model = "tlr" #logistic model
+max.ar = 0.75  #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+#------------Select the data generation randomisation methods-------
+rand.type = "Urn" # Urn design
+max.deviation = 3 # The recommended value for the tuning parameter in the Urn design
+
+# Require multiple cores for parallel running
+cl = 2
+
+# Set the model we want to use and the time trend effect for each model used.
+# Here the main model will be used twice for two different strength of time trend c(0,0,0,0) and c(1,1,1,1) to investigate how time trend affect the evaluation metrics in BAR setting.
+# Then the main + stage_continuous model which is the treatment effect + stage effect model will be applied for strength equal c(1,1,1,1) to investigate how the main + stage effect model improve the evaluation metrics.
+reg.inf = c("main + stage_continuous")
+trend.effect = matrix(c(0.1, 0.1, 0.1, 0.1),
+                      ncol = 4,
+                      nrow = 1,
+                      byrow = T)
+
+#
+cutoffearly = matrix(rep(0.994, dim(alt.scenario)[1]), ncol = 1)
+
+K = dim(alt.scenario)[2]
+print(
+  paste0(
+    "Start trial simulation. This is a ",
+    K,
+    "-arm trial simulation. There are one null scenario and ",
+    K - 1 ,
+    " alternative scenarios. There are ",
+    K ,
+    " rounds."
+  )
+)
+cutoffindex = 1
+```
+```{r, eval=FALSE}
+
+result = {
+  
+}
+OPCalt = {
+  
+}
+for (i in 1:dim(alt.scenario)[1]) {
+  trendindex = 1
+  for (j in 1:length(reg.inf)){
+    restlr = Trial.simulation(
+      ntrials = ntrials,
+      # Number of trial replicates
+      trial.fun = simulatetrial,
+      # Call the main function
+      input.info = list(
+        response.probs = alt.scenario[cutoffindex, ],
+        #The scenario vector in this round
+        ns = ns,
+        # Sequence of total number of accrued patients at each interim analysis
+        max.ar =  max.ar,
+        #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+        rand.type = rand.type,
+        # Which randomisation methods in data generation.
+        max.deviation = max.deviation,
+        # The recommended value for the tuning parameter in the Urn design
+        model.inf = list(
+          model = model,
+          #Use which model?
+          ibb.inf = list(
+            #independent beta-binomial model which can be used only for no time trend simulation
+            pi.star = 0.5,
+            # beta prior mean
+            pess = 2,
+            # beta prior effective sample size
+            betabinomialmodel = ibetabinomial.post # beta-binomial model for posterior estimation
+          ),
+          tlr.inf = list(
+            beta0_prior_mu = 0,
+            # Stan logistic model t prior location
+            beta1_prior_mu = 0,
+            # Stan logistic model t prior location
+            beta0_prior_sigma = 2.5,
+            # Stan logistic model t prior sigma
+            beta1_prior_sigma = 2.5,
+            # Stan logistic model t prior sigma
+            beta0_df = 7,
+            # Stan logistic model t prior degree of freedom
+            beta1_df = 7,
+            # Stan logistic model t prior degree of freedom
+            reg.inf =  reg.inf[trendindex],
+            # The model we want to use
+            variable.inf = "Fixeffect" # Use fix effect logistic model
+          )
+        ),
+        Stopbound.inf = Stopboundinf(
+          Stop.type = "Early-Pocock",
+          # Use Pocock like early stopping boundary
+          Boundary.type = "Symmetric",
+          # Use Symmetric boundary where cutoff value for efficacy boundary and futility boundary sum up to 1
+          cutoff = c(cutoffearly[cutoffindex, 1], 1 - cutoffearly[cutoffindex, 1]) # The cutoff value for stopping boundary
+        ),
+        Random.inf = list(
+          Fixratio = FALSE,
+          # Do not use fix ratio allocation
+          Fixratiocontrol = NA,
+          # Do not use fix ratio allocation
+          BARmethod = "Thall",
+          # Use Thall's Bayesian adaptive randomisation approach
+          Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1) # Specified the tunning parameter value for fixed tuning parameter
+        ),
+        trend.inf = list(
+          trend.type = "step",
+          # Linear time trend pattern
+          trend.effect = trend.effect[trendindex, ],
+          # Stength of time trend effect
+          trend_add_or_multip = "mult" # Multiplicative time trend effect on response probability
+        )
+      ),
+      cl = 2 # 2 cores required
+    )
+  trendindex = trendindex + 1
+  # The result list can be used for plotting and the OPC table is the summary evaluaton metrics for each scenario
+  result = c(result, restlr$result)
+  OPC_alt = rbind(OPC_alt, restlr$OPC)
+  }  
+  cutoffindex = cutoffindex + 1
+}
+```
+```{r}
+print("Finished alternative scenario study")
+save_data = FALSE
+if (isTRUE(save_data)) {
+  save(result, file = restlr$Nameofsaveddata$nameData)
+  save(OPC_alt, file = restlr$Nameofsaveddata$nameTable)
+}
+
+```
+
+Present the evaluation metrics for alternative scenarios. The power used here is the conjunctive power where the trial will be sucessful only if the effective arms are correctly claimed to be effective and all other null arms are claimed to be ineffective.
+
+```{r}
+# Characteristic table
+print(OPC_alt)
+```
