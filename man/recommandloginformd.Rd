@@ -7,7 +7,7 @@
 \format{
 A data frame with 20 rows and 1 variables:
 \describe{
-\item{\code{recommandloginformd}}{double The cutoff value at each time point}
+\item{\code{recommandloginformd}}{The cutoff value at each time point}
 }
 }
 \usage{

@@ -7,9 +7,9 @@
 \format{
 A data frame with 24 rows and 3 variables:
 \describe{
-\item{\code{tpIE}}{double FWER}
-\item{\code{cutoff}}{double Cutoff value}
-\item{\code{cutoff2}}{double Square of cutoff value}
+\item{\code{tpIE}}{FWER}
+\item{\code{cutoff}}{Cutoff value}
+\item{\code{cutoff2}}{Square of cutoff value}
 }
 }
 \usage{

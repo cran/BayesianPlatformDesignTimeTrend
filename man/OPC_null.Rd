@@ -7,22 +7,22 @@
 \format{
 A data frame with 3 rows and 16 variables:
 \describe{
-\item{\code{Type.I.Error.or.Power}}{double Family wise error rate}
-\item{\code{Bias.1}}{double Treatmenteffect bias for treatment 1}
-\item{\code{Bias.2}}{double Treatmenteffect bias for treatment 2}
-\item{\code{Bias.3}}{double Treatmenteffect bias for treatment 3}
-\item{\code{rMSE.1}}{double Rooted mean squared error for treatment 1}
-\item{\code{rMSE.2}}{double Rooted mean squared error for treatment 2}
-\item{\code{rMSE.3}}{double Rooted mean squared error for treatment 3}
-\item{\code{N.per.arm.1}}{double Mean total number of patient allocated to control}
-\item{\code{N.per.arm.2}}{double Mean total number of patient allocated to treatment 1}
-\item{\code{N.per.arm.3}}{double Mean total number of patient allocated to treatment 2}
-\item{\code{N.per.arm.4}}{double Mean total number of patient allocated to treatment 3}
-\item{\code{Survive.per.arm.1}}{double Mean total number of patient allocated to control}
-\item{\code{Survive.per.arm.2}}{double Mean total number of patient survived when using treatment 1}
-\item{\code{Survive.per.arm.3}}{double Mean total number of patient survived when usin treatment 2}
-\item{\code{Survive.per.arm.4}}{double Mean total number of patient survived when usin treatment 3}
-\item{\code{N}}{double Mean total number of patient in a trial}
+\item{\code{Type.I.Error.or.Power}}{Family wise error rate}
+\item{\code{Bias.1}}{Treatment effect bias for treatment 1}
+\item{\code{Bias.2}}{Treatment effect bias for treatment 2}
+\item{\code{Bias.3}}{Treatment effect bias for treatment 3}
+\item{\code{rMSE.1}}{Rooted mean squared error for treatment 1}
+\item{\code{rMSE.2}}{Rooted mean squared error for treatment 2}
+\item{\code{rMSE.3}}{Rooted mean squared error for treatment 3}
+\item{\code{N.per.arm.1}}{Mean total number of patient allocated to control}
+\item{\code{N.per.arm.2}}{Mean total number of patient allocated to treatment 1}
+\item{\code{N.per.arm.3}}{Mean total number of patient allocated to treatment 2}
+\item{\code{N.per.arm.4}}{Mean total number of patient allocated to treatment 3}
+\item{\code{Survive.per.arm.1}}{Mean total number of patient allocated to control}
+\item{\code{Survive.per.arm.2}}{Mean total number of patient survived when using treatment 1}
+\item{\code{Survive.per.arm.3}}{Mean total number of patient survived when usin treatment 2}
+\item{\code{Survive.per.arm.4}}{Mean total number of patient survived when usin treatment 3}
+\item{\code{N}}{Mean total number of patient in a trial}
 }
 }
 \usage{

@@ -3,7 +3,7 @@
 #' @param ii Meaning less parameter but required for foreach function in doParallel package
 #' @param response.probs A vector of true response probability for each arm. Default response.probs = c(0.4, 0.4).
 #' @param ns  A vector of accumulated number of patient at each stage. Default is ns = c(30, 60, 90, 120, 150).
-#' @param max.ar The upper boundary for randomisation ratio for each arm. Default is 0.75 for a two arm trial.
+#' @param max.ar The upper boundary for randomisation ratio for each arm. Default is 0.75 for a two arm trial. The minimum value depends on K where 1 - max.ar <= 1/K
 #' @param rand.algo The method of applying patient allocation with a given randomisation probability vector. Default is "Urn".
 #' @param max.deviation The tuning parameter for Urn randomisation method. Default is 3.
 #' @param Stopbound.inf The list of stop boundary information for more see \code{\link{Stopboundinf}}
@@ -113,9 +113,14 @@ simulatetrial <- function(ii,
   randomprob = initialised.par$randomprob
   z = initialised.par$z
   y = initialised.par$y
-
   group_indicator = initialised.par$group_indicator
   post.prob.best.mat = initialised.par$post.prob.best.mat
+
+  #-max.ar check
+  if (1 - max.ar > 1/K){
+    stop("Error: The lower allocation ratio should be at least 1/K. Please check the number of arm at the beginning and the max.ar")
+  }
+
   #Initialize the output data frame: stats
   stats = OutputStats.initialising(model.inf$tlr.inf$variable.inf,
                                    model.inf$tlr.inf$reg.inf,
@@ -159,7 +164,7 @@ simulatetrial <- function(ii,
       )
     }
     else {
-      stop("Error randomisation type wrong")
+      stop("Error: randomisation type wrong")
     }
 
     # Extract the output list

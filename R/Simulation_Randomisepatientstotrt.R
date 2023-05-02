@@ -145,7 +145,8 @@ AdaptiveRandomisation = function(Fixratio,
     colnames(randomprob) = seq(1, K)
 
     rpk[1] = Fixratiocontrol / (Fixratiocontrol + 1 * (armleft - 1))
-    rpk[-1] = rep((armleft - 1) / (armleft - 1 + Fixratiocontrol), armleft -
+    # Debugged on 02052023 by ziyan wang. The original code is not suitable for multiarm fix ratio.
+    rpk[-1] = rep(1 / (armleft - 1 + Fixratiocontrol), armleft -
                     1)
     rpk = rpk / sum(rpk)
     randomprob[as.numeric(colnames(rpk))] = randomprob[as.numeric(colnames(rpk))] + rpk

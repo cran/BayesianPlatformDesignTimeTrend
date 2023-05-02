@@ -27,7 +27,7 @@ simulatetrial(
 
 \item{ns}{A vector of accumulated number of patient at each stage. Default is ns = c(30, 60, 90, 120, 150).}
 
-\item{max.ar}{The upper boundary for randomisation ratio for each arm. Default is 0.75 for a two arm trial.}
+\item{max.ar}{The upper boundary for randomisation ratio for each arm. Default is 0.75 for a two arm trial. The minimum value depends on K where 1 - max.ar <= 1/K}
 
 \item{rand.algo}{The method of applying patient allocation with a given randomisation probability vector. Default is "Urn".}
 

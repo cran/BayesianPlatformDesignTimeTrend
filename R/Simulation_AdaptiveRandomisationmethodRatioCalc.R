@@ -104,20 +104,19 @@ ARmethod = function(Fixratio,
     }
     #-------------------Allocation bounds restriction (K arm: restriction on control)---------------
     else if (K > 2) {
-      rpk = matrix(rep(0, armleft), ncol = armleft)
-      randomprob = matrix(rep(0, K), ncol = K)
-      colnames(rpk) = c(1, treatmentindex + 1)
-      colnames(randomprob) = seq(1, K)
+      rpk = matrix(rep(0,armleft),ncol = armleft)
+      randomprob = matrix(rep(0,K),ncol = K)
+      colnames(rpk) = c(1,treatmentindex+1)
+      colnames(randomprob) = seq(1,K)
       rpk[1] = alloc.prob.best[1]
       rpk[-1] = alloc.prob.best[-1][treatmentindex]
-      rpk = rpk / sum(rpk)
-      lower = ifelse(rpk[1] < (1 - max.ar), 1 - max.ar, rpk[1])
-      rpk[1] = lower
-      upper = ifelse(rpk[1] > max.ar, max.ar, rpk[1])
-      rpk[1] = upper
-      rpk[-1] = (1 - rpk[1]) * rpk[-1] / sum(rpk[-1])
-      randomprob[as.numeric(colnames(rpk))] = randomprob[as.numeric(colnames(rpk))] +
-        rpk
+      rpk = rpk/sum(rpk)
+      lower = ifelse(rpk<(1-max.ar),1-max.ar,rpk)
+      rpk = lower
+      upper = ifelse(rpk>max.ar,max.ar,rpk)
+      rpk = upper
+      rpk[!(rpk==(1-max.ar))]=(1-sum(rpk[rpk==1-max.ar]))*(rpk[!(rpk==1-max.ar)]/sum(rpk[!(rpk==1-max.ar)]))
+      randomprob[as.numeric(colnames(rpk))] = randomprob[as.numeric(colnames(rpk))]+rpk
     }
 
   }

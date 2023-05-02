@@ -7,7 +7,7 @@
 \format{
 A data frame with 1001 rows and 1 variables:
 \describe{
-\item{\code{predictedtpIEinformd}}{double The predicted FWER value of a large grid}
+\item{\code{predictedtpIEinformd}}{The predicted FWER value of a large grid}
 }
 }
 \usage{
