@@ -4,12 +4,23 @@
 \alias{resultstantoRfunc}
 \title{resultstantoRfunc}
 \usage{
-resultstantoRfunc(group, reg.inf, fit, armleft, treatmentindex, K, ns)
+resultstantoRfunc(
+  group,
+  reg.inf,
+  variable.inf,
+  fit,
+  armleft,
+  treatmentindex,
+  K,
+  ns
+)
 }
 \arguments{
 \item{group}{The current stage}
 
 \item{reg.inf}{The information of how much accumulated information will be used}
+
+\item{variable.inf}{The information of whether to use random effect model or fix effect model.}
 
 \item{fit}{The stan output}
 

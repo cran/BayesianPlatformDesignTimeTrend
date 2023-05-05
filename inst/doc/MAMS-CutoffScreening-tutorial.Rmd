@@ -1,6 +1,7 @@
 ---
 title: "MAMS-CutoffScreening-tutorial"
 output: rmarkdown::html_vignette
+author: "Ziyan Wang"
 vignette: >
   %\VignetteIndexEntry{MAMS-CutoffScreening-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,8 +20,8 @@ library(BayesianPlatformDesignTimeTrend)
 ```
 ## Four arm trial cutoff screening
 
-The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening}} and MAMS-CutoffScreening-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentailly during the simulation. 
-In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero first and then set to be 0.5 to study the impact of time trend on different evaluation metrics. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
+The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening}} and MAMS-CutoffScreening-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. 
+In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall's approach. The early stop boundary is the symmetric Pocock boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
 
 ```{r,eval=FALSE}
 

@@ -1,9 +1,9 @@
 ---
-title: "MAMS-CutoffScreening-tutorial"
+title: "MAMS-CutoffScreening-GP-tutorial"
 output: rmarkdown::html_vignette
 author: "Ziyan Wang"
 vignette: >
-  %\VignetteIndexEntry{MAMS-CutoffScreening-tutorial}
+  %\VignetteIndexEntry{MAMS-CutoffScreening-GP-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,15 +20,15 @@ library(BayesianPlatformDesignTimeTrend)
 ```
 ## Four arm trial cutoff screening
 
-The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening}} and MAMS-CutoffScreening-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. 
-In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall's approach. The early stop boundary is the symmetric Pocock boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
+The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening_GP}} and MAMS-CutoffScreening-GP-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. 
+In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall's approach. The early stop boundary is the symmetric OBF boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
 
 ```{r,eval=FALSE}
 
 ntrials = 1000 # Number of trial replicates
-ns = seq(120, 600, 120) # Sequence of total number of accrued patients at each interim analysis
-null.reponse.prob = 0.4
-alt.response.prob = 0.6
+ns = seq(120, 600, 60) # Sequence of total number of accrued patients at each interim analysis
+null.reponse.prob = 0.15
+alt.response.prob = 0.35
 
 # We investigate the type I error rate for different time trend strength
 null.scenario = matrix(
@@ -47,7 +47,7 @@ null.scenario = matrix(
 #                     null.reponse.prob,alt.response.prob,alt.response.prob,null.reponse.prob,
 #                     null.reponse.prob,alt.response.prob,alt.response.prob,alt.response.prob), nrow=3, ncol = 4,byrow=T)
 model = "tlr" #logistic model
-max.ar = 0.75  #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+max.ar = 0.85  #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
 #------------Select the data generation randomisation methods-------
 rand.type = "Urn" # Urn design
 max.deviation = 3 # The recommended value for the tuning parameter in the Urn design
@@ -76,8 +76,18 @@ cutoff.information=demo_Cutoffscreening (
   # Number of trial replicates
   trial.fun = simulatetrial,
   # Call the main function
-  grid.inf = list(start = c(0.9, 0.95, 1), extendlength =
-                    20),
+  grid.inf = list(
+    start.length = 10,
+    grid.min,
+    grid.max,
+    confidence.level = 0.95,
+    grid.length = 5000,
+    change.scale = FALSE,
+    noise = T,
+    errorrate = 0.1,
+    simulationerror = 0.01,
+    iter.max = 15,
+    plotornot = FALSE),
   # Set up the cutoff grid for screening. The start grid has three elements. The extended grid has fifteen cutoff value under investigation
   input.info = list(
     response.probs = null.scenario[1,],
@@ -119,7 +129,7 @@ cutoff.information=demo_Cutoffscreening (
         variable.inf = "Fixeffect" # Use fix effect logistic model
       )
     ),
-    Stop.type = "Early-Pocock",
+    Stop.type = "Early-OBF",
     # Use Pocock like early stopping boundary
     Boundary.type = "Symmetric",
     # Use Symmetric boundary where cutoff value for efficacy boundary and futility boundary sum up to 1
@@ -130,7 +140,7 @@ cutoff.information=demo_Cutoffscreening (
       # Do not use fix ratio allocation
       BARmethod = "Thall",
       # Use Thall's Bayesian adaptive randomisation approach
-      Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1) # Specified the tunning parameter value for fixed tuning parameter
+      Thall.tuning.inf = list(tuningparameter = "Unfixed",  fixvalue = 1) # Specified the tunning parameter value for fixed tuning parameter
     ),
     trend.inf = list(
       trend.type = "linear",
@@ -148,22 +158,30 @@ cutoff.information=demo_Cutoffscreening (
 Summary of the output data from cutoff screening example
 
 ```{r}
+library(ggplot2)
 # Details of grid
-dataloginformd
+optimdata=optimdata
 # Recommend cutoff at each screening round
-t(recommandloginformd)
-# Plot
-  plot(
-    tpIE ~ cutoff,
-    pch = 16,
-    xlab = "Cutoff",
-    ylab = "Type I Error",
-    cex.lab = 1.3,
-    col = "#f8766d",
-    data = data.frame(dataloginformd)
-  )
-  
-  cutoffgrid <- seq(0.9, 1, 0.0001)
-  lines(cutoffgrid, t(predictedtpIEinformd), col = "#00bfc4", lwd = 3)
-```
+nextcutoff = optimdata$next.cutoff
+prediction = optimdata$prediction
+cutoff=optimdata$cutoff
+tpIE=optimdata$tpIE
+cutoff=cutoff[1:sum(!is.na(tpIE))]
+tpIE=tpIE[1:sum(!is.na(tpIE))]
+GP.res = optimdata
+prediction = data.frame(yhat = GP.res$prediction$yhat,
+                        sd = matrix(GP.res$prediction$sd,ncol=1),
+                        qup = GP.res$prediction$qup,
+                        qdown = GP.res$prediction$qdown,
+                        xgrid = GP.res$prediction$xgrid)
+GPplot=ggplot(data = prediction) +
+        geom_ribbon(aes(x = xgrid, ymin = qdown, ymax = qup),col="#f8766d", alpha = 0.5,linetype = 2) +
+        geom_line(aes(xgrid, yhat),col = "#f8766d") +
+        geom_point(aes(cutoff[1:sum(!is.na(tpIE))], tpIE[1:sum(!is.na(tpIE))]),
+                   data = data.frame(tpIE=tpIE,cutoff=cutoff),col = "#00bfc4") +
+        geom_hline(yintercept = 0.1) +
+        geom_vline(xintercept = nextcutoff, linetype = 2) +
+        geom_text(aes(x=6,y=0.8,label=paste0("Next cutoff value is ",round(nextcutoff,3))))+
+        theme_minimal()
+print(GPplot)
 ```

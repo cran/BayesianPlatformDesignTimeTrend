@@ -1,6 +1,6 @@
 #' @title Stopboundinf
 #' @description This function summaries and checks stopping boundary information.
-#' @param Stop.type The type of stopping boundary. Default is "Early-Pocock" which is the Pocock boundary with early stopping.
+#' @param Stop.type The type of stopping boundary should be "Early-Pocock", "Early-OBF" and "Noearly". Default is "Early-Pocock" which is the Pocock boundary with early stopping.
 #'
 #' @param Boundary.type Whether the futility boundary and the efficacy boundary are the same conservative.
 #'     Default is "Symmetric" which means they are as conservative as each other.
@@ -32,7 +32,7 @@ Stopboundinf = function(Stop.type="Early-Pocock", Boundary.type="Symmetric", cut
     if (Stop.type == "Early-OBF" & cutoff[1] == cutoff[2]) {
       cutofftemp = cutoff
     }
-    else if (sum(cutoff) == 1) {
+    else if (sum(Stop.type == c("Early-Pocock","Noearly")) & sum(cutoff) == 1) {
       cutofftemp = cutoff
     }
     else{
@@ -40,7 +40,7 @@ Stopboundinf = function(Stop.type="Early-Pocock", Boundary.type="Symmetric", cut
     }
   }
   else if (Boundary.type == "Asymmetric") {
-    if (Stop.type == "Early-OBF" & cutoff[1] != cutoff[2]) {
+    if (sum(Stop.type == c("Early-Pocock","Noearly")) & cutoff[1] != cutoff[2]) {
       cutofftemp = cutoff
     }
     else if (sum(cutoff) != 1) {

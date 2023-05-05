@@ -374,6 +374,7 @@ simulatetrial <- function(ii,
         processedfitresult = resultstantoRfunc(
           group = group,
           reg.inf = model.inf$tlr.inf$reg.inf,
+          variable.inf = model.inf$tlr.inf$variable.inf,
           fit = fit,
           armleft = armleft,
           treatmentindex = treatmentindex,

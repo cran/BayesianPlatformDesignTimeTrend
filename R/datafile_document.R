@@ -92,3 +92,15 @@
 #'}
 
 "OPC_Trial.simulation"
+
+#' @title A list of data from Gaussian process for cutoff screening.
+#' @description A list of data from Gaussian process for cutoff screening.
+#' @format A list with two element:
+#' \describe{
+#'   \item{\code{next.cutoff}}{The cutoff value for the next evaluation}
+#'   \item{\code{prediction}}{A list of values from Gaussian process model}
+#'   \item{\code{tpIE}}{A vector of type I error rate data}
+#'   \item{\code{cutoff}}{A vector of cutoff data}
+#'}
+
+"optimdata"

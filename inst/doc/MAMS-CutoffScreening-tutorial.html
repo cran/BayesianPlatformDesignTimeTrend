@@ -10,6 +10,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+<meta name="author" content="Ziyan Wang" />
 
 
 <title>MAMS-CutoffScreening-tutorial</title>
@@ -138,21 +139,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <h1 class="title toc-ignore">MAMS-CutoffScreening-tutorial</h1>
+<h4 class="author">Ziyan Wang</h4>
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BayesianPlatformDesignTimeTrend)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: rstan</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: StanHeaders</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: ggplot2</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; rstan (Version 2.21.8, GitRev: 2e1f913d3ca3)</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; For execution on a local, multicore CPU with excess RAM we recommend calling</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; options(mc.cores = parallel::detectCores()).</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; To avoid recompilation of unchanged Stan programs, we recommend calling</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; rstan_options(auto_write = TRUE)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BayesianPlatformDesignTimeTrend)</span></code></pre></div>
 <div id="four-arm-trial-cutoff-screening" class="section level2">
 <h2>Four arm trial cutoff screening</h2>
-<p>The ‘BayesianPlatformDesignTimeTrend’ package simulation process requires stopping boundary cutoff screening first (details refers to demo  and MAMS-CutoffScreening-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentailly during the simulation. In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be ‘linear’. The way of time trend impacting the beginning response probability is set to be ‘mult’ (multiplicative). The time trend strength is set to be zero first and then set to be 0.5 to study the impact of time trend on different evaluation metrics. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.</p>
+<p>The ‘BayesianPlatformDesignTimeTrend’ package simulation process requires stopping boundary cutoff screening first (details refers to demo  and MAMS-CutoffScreening-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be ‘linear’. The way of time trend impacting the beginning response probability is set to be ‘mult’ (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall’s approach. The early stop boundary is the symmetric Pocock boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ntrials <span class="ot">=</span> <span class="dv">1000</span> <span class="co"># Number of trial replicates</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ns <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">120</span>, <span class="dv">600</span>, <span class="dv">120</span>) <span class="co"># Sequence of total number of accrued patients at each interim analysis</span></span>

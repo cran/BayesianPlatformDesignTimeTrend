@@ -3,6 +3,7 @@
 
 #' @param group The current stage
 #' @param reg.inf The information of how much accumulated information will be used
+#' @param variable.inf The information of whether to use random effect model or fix effect model.
 #' @param fit The stan output
 #' @param armleft The number of treatment left in the platform (>2)
 #' @param treatmentindex A vector of treatment index at the beginning of a trial
@@ -28,6 +29,7 @@
 #' @author Ziyan Wang
 resultstantoRfunc = function(group,
                              reg.inf,
+                             variable.inf,
                              fit,
                              armleft,
                              treatmentindex,
@@ -220,6 +222,13 @@ resultstantoRfunc = function(group,
   else if (group > 1 & reg.inf != "main") {
     stop("Regression information inputted wrong")
   }
+  # Because only the fixed effect model is used at stage 1,
+  # this command is written to make sure that when using random effect model the output matrix can be written correctly.
+ if (variable.inf == "Mixeffect"){
+  stats6 = rep(NA, length(ns) - 1)
+  stats7 = {
+  }
+ }
   return(
     list(
       stats1 = stats1,

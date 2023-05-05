@@ -1,6 +1,7 @@
 ---
 title: "MAMS-trial-simulation-tutorial"
 output: rmarkdown::html_vignette
+author: "Ziyan Wang"
 vignette: >
   %\VignetteIndexEntry{MAMS-trial-simulation-tutorial}
   %\VignetteEngine{knitr::rmarkdown}

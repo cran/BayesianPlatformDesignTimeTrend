@@ -11,7 +11,7 @@ Stopboundinf(
 )
 }
 \arguments{
-\item{Stop.type}{The type of stopping boundary. Default is "Early-Pocock" which is the Pocock boundary with early stopping.}
+\item{Stop.type}{The type of stopping boundary should be "Early-Pocock", "Early-OBF" and "Noearly". Default is "Early-Pocock" which is the Pocock boundary with early stopping.}
 
 \item{Boundary.type}{Whether the futility boundary and the efficacy boundary are the same conservative.
 Default is "Symmetric" which means they are as conservative as each other.
