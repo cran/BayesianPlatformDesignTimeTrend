@@ -1,6 +1,6 @@
 Package: BayesianPlatformDesignTimeTrend
 Title: Simulate and Analyse Bayesian Platform Trial with Time Trend
-Version: 1.1.0
+Version: 1.1.1
 Author: Ziyan Wang [aut, cre]
 Maintainer: Ziyan Wang <zw7g20@soton.ac.uk>
 Authors@R: 
@@ -8,7 +8,7 @@ Authors@R:
            family = "Wang",
            role = c("aut", "cre"),
            email = "zw7g20@soton.ac.uk")
-Description: Simulating the multi-arm multi-stage or platform trial with Bayesian approach using the 'rstan' package, which provides the R interface for the Stan. 
+Description: Simulating the sequential multi-arm multi-stage or platform trial with Bayesian approach using the 'rstan' package, which provides the R interface for the Stan. 
     This package supports fixed ratio and Bayesian adaptive randomization approaches for randomization. 
     Additionally, it allows for the study of time trend problems in platform trials. 
     There are demos available for a multi-arm multi-stage trial with two different null scenarios, as well as for Bayesian trial cutoff screening.
@@ -39,6 +39,6 @@ Suggests: rmarkdown, knitr
 VignetteBuilder: knitr
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2023-05-04 12:35:45 UTC; ziyanwang
+Packaged: 2023-06-11 20:06:17 UTC; ziyanwang
 Repository: CRAN
-Date/Publication: 2023-05-05 07:45:35 UTC
+Date/Publication: 2023-06-12 13:00:05 UTC

@@ -276,10 +276,13 @@ demo_Cutoffscreening.GP = function(ntrials = 1000,
           geom_point(ggplot2::aes(cutoff[1:sum(!is.na(prediction$tpIE))], prediction$tpIE[1:sum(!is.na(prediction$tpIE))]),
                               data = data.frame(rbind(startgrid, extendgrid))) +
           geom_hline(yintercept = grid.inf$errorrate) +
+          geom_text(aes(x=grid.min,y=grid.inf$errorrate+0.05,label=paste0("FWER target is ",grid.inf$errorrate)),hjust=0,vjust=1)+
           geom_vline(xintercept = nextcutoff, linetype = 2) +
-          theme_minimal() +
+          geom_text(aes(x=nextcutoff,y=grid.inf$errorrate*2,label=paste0("Next cutoff value is ",round(nextcutoff,3))))+
+          theme_minimal() +ylab("FWER")+xlab("Cutoff grid")+
           labs(title = paste0("Iteration", cutoffindex))
       }
+      # Debug here for asymmetric boundary on April 30, 2023
       else if (Boundary.type != "Symmetric") {
         stop("Error: Plot is not available for asymmetric boundary now")
       }

@@ -42,6 +42,7 @@ GP.optim = function(x,
                     noise = T,
                     grid.min,
                     grid.max) {
+  # Debug here for GP model with Bayesian optimisation on April 25, 2023
   eps = .Machine$double.eps
   # loglikelihood function
   nlg = function(g, D, y) {
@@ -95,7 +96,13 @@ GP.optim = function(x,
   weighs = sqrt(1 / (abs(grid.new[target] - errorrate) + e) * abs(diag(sigma))[which(target)])
   randomprobability = weighs / sum(weighs)
   # randomise the next value from the potential set
-  next.cutoff = sample(potentialcutoff, 1, replace = T, prob = randomprobability)
+  # Debugged on 11/06/2023 by Ziyan wang. Cran check and find one error due to the use of sample()
+  if (length(potentialcutoff) > 1){
+    next.cutoff = sample(potentialcutoff, 1, replace = T, prob = randomprobability)
+  }
+  else {
+    next.cutoff = potentialcutoff[sample(length(potentialcutoff), 1, replace = T, prob = randomprobability)]
+  }
   return(list(
     next.cutoff = next.cutoff,
     prediction = list(

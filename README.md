@@ -16,7 +16,7 @@ multi-stage trial for two different null scenario in this package.
 
 ## Installation
 
-You can install the ‘BayesianPlatformDesignTimeTrend’ package 1.0.0 like
+You can install the ‘BayesianPlatformDesignTimeTrend’ package 1.1.1 like
 so:
 
 ``` r

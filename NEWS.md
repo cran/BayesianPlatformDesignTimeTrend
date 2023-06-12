@@ -1,12 +1,18 @@
+# Jun 11, 2023, BayesianPlatformDesignTimeTrend version 1.1.1
+This release fix one bug reported by the cran team.
+
+- I fixed the bug in function `GP.optim` where the nextcutoff vector for sample may have only one element. This will lead to the error in function `sample` when you only want to sample one value greater than 1.
+- The argument 'ntrials' in each example should be large (> 100) instead 2 to make the example more like an actual simulation example. I use ntrials = 2 in the example to speed up the check process.
 # May 2, 2023, BayesianPlatformDesignTimeTrend version 1.1.0
 This release implements additional method of cutoff screening using Bayesian optimization.
+
 ## New feature
 - Add a new Demo function called `demo_Cutoffscreening_GP`. The function indicates how to use Gaussian process-based Bayesian optimisation algorithm to calibrate the critical value for stopping boundary under the null scenario to control the Type I error rate or FWER before trial simulation. 
 
 - Add a function `GP_optim` which returns a cutoff value for the next evaluation during the cutoff screening process. The function is used in demo `demo_Cutoffscreening_GP`.
 
 ## Bugs
-- I found that the output data matrix can not be generated  when there are four arm, the 'variable.inf'="Mixeffect" and 'reg.inf' is "main"/"main + stage_continuous"/"main * stage_discrete".
+- I found that the output data matrix can not be generated  when there are four arm, the 'variable.inf' = "Mixeffect" and 'reg.inf' is "main"/"main + stage_continuous"/"main * stage_discrete".
 It only work for 'variable.inf'="Mixeffect" and 'reg.inf = main + stage_discrete'. The reason why this happen is that the length of stats6 and stats7 variable are not generated correctly at stage 1 since the fixed effect model is used for 'variable.inf'="Mixeffect" at stage 1 to speed up the simulation.
 
 ## Debug

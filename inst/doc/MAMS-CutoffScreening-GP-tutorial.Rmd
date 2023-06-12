@@ -9,10 +9,10 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+ knitr::opts_chunk$set(
+   collapse = TRUE,
+   comment = "#>"
+ )
 ```
 
 ```{r setup}
@@ -71,7 +71,7 @@ K = dim(null.scenario)[2]
 cutoffindex = 1
 trendindex = 1
 
-cutoff.information=demo_Cutoffscreening (
+cutoff.information=demo_Cutoffscreening.GP (
   ntrials = ntrials,
   # Number of trial replicates
   trial.fun = simulatetrial,
@@ -179,9 +179,15 @@ GPplot=ggplot(data = prediction) +
         geom_line(aes(xgrid, yhat),col = "#f8766d") +
         geom_point(aes(cutoff[1:sum(!is.na(tpIE))], tpIE[1:sum(!is.na(tpIE))]),
                    data = data.frame(tpIE=tpIE,cutoff=cutoff),col = "#00bfc4") +
-        geom_hline(yintercept = 0.1) +
+        geom_point(aes(nextcutoff, 0.1),
+                   data = data.frame(tpIE=tpIE,cutoff=cutoff),col = "#f8766d") +
+        geom_hline(yintercept = 0.1,linetype = 2) +
+        geom_text(aes(x=1,y=0.15,label=paste0("FWER target is 0.1")),hjust=0,vjust=1)+
         geom_vline(xintercept = nextcutoff, linetype = 2) +
         geom_text(aes(x=6,y=0.8,label=paste0("Next cutoff value is ",round(nextcutoff,3))))+
-        theme_minimal()
+        theme_minimal()+ylab("FWER")+xlab("Cutoff value of the OBF boundary (c*)")+
+  geom_point(aes(nextcutoff, 0.1),
+                   data = data.frame(tpIE=tpIE,cutoff=cutoff),col = "#f8766d") +
+  theme(plot.background = element_rect(fill = "#e6dfba"))
 print(GPplot)
 ```
