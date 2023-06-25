@@ -122,7 +122,12 @@ demo_Cutoffscreening = function(ntrials = 1000,
   randomprobability = (1 / (abs(predictedtpIE[abs(predictedtpIE - 0.05) <=
                                                 0.0025] - 0.05) + e)) / sum(1 / (abs(predictedtpIE[abs(predictedtpIE - 0.05) <=
                                                                                                      0.0025] - 0.05) + e))
-  nextcutoff = sample(potentialcutoff, 1, replace = T, prob = randomprobability)
+  if (length(potentialcutoff) > 1){
+    nextcutoff = sample(potentialcutoff, 1, replace = T, prob = randomprobability)
+  }
+  else {
+    nextcutoff = cutoffgrid[which.min(abs(predictedtpIE - 0.05))]
+  }
   extendgrid[1, 2] = nextcutoff
   recommand = {
 
@@ -165,9 +170,16 @@ demo_Cutoffscreening = function(ntrials = 1000,
       randomprobability = 1
       potentialcutoff = extendgrid[cutoffindex, 2]
     }
-    extendgrid[cutoffindex + 1, 2] = sample(potentialcutoff, 1, replace = T, prob = randomprobability)
-    recommand = c(recommand, cutoffgrid[as.numeric(names(which.max(randomprobability)))])
-    message(paste("Finished extend grid screening round", cutoffindex))
+    if (length(potentialcutoff) > 1){
+      extendgrid[cutoffindex + 1, 2] = sample(potentialcutoff, 1, replace = T, prob = randomprobability)
+      recommand = c(recommand, cutoffgrid[as.numeric(names(which.max(randomprobability)))])
+      message(paste("Finished extend grid screening round", cutoffindex))
+    }
+    else {
+      extendgrid[cutoffindex + 1, 2] = cutoffgrid[which.min(abs(predictedtpIE - 0.05))]
+      recommand = c(recommand, cutoffgrid[which.min(abs(predictedtpIE - 0.05))])
+      message(paste("Finished extend grid screening round", cutoffindex))
+    }
   }
   message("Output data recording")
   dataloginformd = data.frame(rbind(startgrid, extendgrid))

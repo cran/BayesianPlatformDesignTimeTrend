@@ -60,6 +60,9 @@ GP.optim = function(x,
                  D = D,
                  y = y)$minimum
   }
+  else{
+    g = eps
+  }
 
   gridx = seq(grid.min, grid.max, length.out = grid.length)
   if (change.scale) {
@@ -93,7 +96,7 @@ GP.optim = function(x,
   # construct the potential cutoff set
   potentialcutoff = grid.new[which(target)]
   e = 1e-10
-  weighs = sqrt(1 / (abs(grid.new[target] - errorrate) + e) * abs(diag(sigma))[which(target)])
+  weighs = 1 / sqrt((abs(yhat[target] - errorrate) + e) * abs(diag(sigma))[which(target)])
   randomprobability = weighs / sum(weighs)
   # randomise the next value from the potential set
   # Debugged on 11/06/2023 by Ziyan wang. Cran check and find one error due to the use of sample()

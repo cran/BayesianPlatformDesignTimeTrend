@@ -20,8 +20,8 @@ You can install the ‘BayesianPlatformDesignTimeTrend’ package 1.1.1 like
 so:
 
 ``` r
- install.packages("BayesianPlatformDesignTimeTrend")
- devtools::install_github("ZXW834/PlatFormDesignTime", build_vignettes = TRUE)
+# install.packages("BayesianPlatformDesignTimeTrend")
+# devtools::install_github("ZXW834/PlatFormDesignTime", build_vignettes = TRUE)
 ```
 
 ## Demo
@@ -43,7 +43,7 @@ so:
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
- library(BayesianPlatformDesignTimeTrend)
+# library(BayesianPlatformDesignTimeTrend)
 ## basic example code
 ```
 

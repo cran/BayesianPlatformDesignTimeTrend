@@ -1,8 +1,15 @@
+# Jun 25, 2023, BayesianPlatformDesignTimeTrend version 1.1.2
+This release fix two bugs.
+
+- I fixed the bug in function `GP.optim` where the formula of information weighed randomisation is wrong.
+- I fixed the bug in function `demo_Cutoffscreening` where the nextcutoff vector for sample may have only one element. This will lead to the error in function `sample` when you only want to sample one value greater than 1. The argument 'ntrials' in each example should be large (> 100) instead 2 to make the example more like an actual simulation example. I use ntrials = 2 in the example to speed up the check process.
+
 # Jun 11, 2023, BayesianPlatformDesignTimeTrend version 1.1.1
 This release fix one bug reported by the cran team.
 
 - I fixed the bug in function `GP.optim` where the nextcutoff vector for sample may have only one element. This will lead to the error in function `sample` when you only want to sample one value greater than 1.
 - The argument 'ntrials' in each example should be large (> 100) instead 2 to make the example more like an actual simulation example. I use ntrials = 2 in the example to speed up the check process.
+
 # May 2, 2023, BayesianPlatformDesignTimeTrend version 1.1.0
 This release implements additional method of cutoff screening using Bayesian optimization.
 
