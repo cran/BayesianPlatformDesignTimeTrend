@@ -32,15 +32,16 @@ resultrtostats = function(trteff = NA,
                           ns) {
   sampeff = rstan::extract(fit, 'beta1')[[1]]
   if (group > 1 & stringr::str_detect(reg.inf, "\\*")) {
+    maineffect = trteff
     if (stringr::str_detect(reg.inf, "continuous")) {
       interactioneff = matrix(sampeff[, (armleft + 1):(2 * armleft - 1)], ncol = armleft - 1)
       for (temp in 1:dim(trteff)[2]) {
         trteff[, temp] = trteff[, temp] + interactioneff[, temp] * group
       }
       #Mean estimates and variance of treatment effect
-      beta1mean = matrix(colMeans(trteff), ncol = armleft - 1)
+      beta1mean = matrix(colMeans(maineffect), ncol = armleft - 1)
       colnames(beta1mean) = treatmentindex
-      beta1var = matrix(sapply(data.frame(trteff), var), ncol = armleft - 1)
+      beta1var = matrix(sapply(data.frame(maineffect), var), ncol = armleft - 1)
       colnames(beta1var) = treatmentindex
 
       #Record mean estimate and variance
@@ -62,14 +63,15 @@ resultrtostats = function(trteff = NA,
       return(list(stats4 = stats4, stats5 = stats5))
     }
     else {
+      maineffect = trteff
       interactioneff = matrix(sampeff[,-(1:(armleft - 1 + group - 1))], ncol = (group - 1) * (armleft - 1))
       for (temp in 1:dim(trteff)[2]) {
         trteff[, temp] = trteff[, temp] + interactioneff[, (group - 1) * temp]
       }
       #Mean estimates and variance of treatment effect
-      beta1mean = matrix(colMeans(trteff), ncol = armleft - 1)
+      beta1mean = matrix(colMeans(maineffect), ncol = armleft - 1)
       colnames(beta1mean) = treatmentindex
-      beta1var = matrix(sapply(data.frame(trteff), var), ncol = armleft - 1)
+      beta1var = matrix(sapply(data.frame(maineffect), var), ncol = armleft - 1)
       colnames(beta1var) = treatmentindex
 
       #Record mean estimate and variance

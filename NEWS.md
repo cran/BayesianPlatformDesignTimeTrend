@@ -1,3 +1,8 @@
+# Aug 22, 2023, BayesianPlatformDesignTimeTrend version 1.1.3
+This release fix one command in fix effect model analysis of main effect that is confusing.
+
+- I fixed the bug in function `resultrtostats`. THe calculation of "stats4" was the sum of main effect and interaction effect when using the model with interaction term (main * stage_continuous / main * stage_discrete). The sum was used to calculate the posterior probability of superior or inferior. However, "stats4" only represents the mean values of main effect in the final output matrix. The wrong value was given to "stats4". This is the same for "stats5" which is the standard errors of the main effect in the model
+
 # Jun 25, 2023, BayesianPlatformDesignTimeTrend version 1.1.2
 This release fix two bugs.
 

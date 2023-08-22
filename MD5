@@ -1,7 +1,7 @@
-249aa0bcf2654c2ae1d4d0175c7f8e4a *DESCRIPTION
+0ba2cb0a60fa033db9feebba2bd5bc5a *DESCRIPTION
 129d4fd87309c515f421bacb3c869689 *LICENSE
 474da0050819cd0d4d85b20521ec7e81 *NAMESPACE
-b79669e2d99e0ee29128b6af10b61515 *NEWS.md
+0b03468085bca7a9095f3b56754e261f *NEWS.md
 7d1f5886d975a68f93d570ab0a9d9fdf *R/Analysis_listofanalysisfunction.R
 ce8b9d0cba696d1950c003d26098a4ab *R/BayesianPlatformDesignTimeTrend-package.R
 8d95be3e0c4423d07f3868772289587c *R/Demo_CutoffScreening.R
@@ -18,7 +18,7 @@ fc28cf221db627b1506d4f26b22bd217 *R/Simulation_Boundaryconstruction.R
 21da59a5f49b8482a7f0a448812a2a61 *R/Simulation_Randomisationinformationcheck.R
 416a74c3997575e81111f34a4d771313 *R/Simulation_Randomisepatientstotrt.R
 f639c5a7ad0b755b789fa9af8f01c1a0 *R/Simulation_Stanlogisticdatatransform.R
-8d9db8d25aee322e0c73b8304f484b25 *R/Simulation_Stansamplesummary_Fixeffect.R
+83cb629768e4a094ff45487866aeaf31 *R/Simulation_Stansamplesummary_Fixeffect.R
 25c6072943623aeebf0f6a53dd2af5b1 *R/Simulation_Stansamplesummary_Mixeffect.R
 0f33f64684f03840d5abc474fd03ea8c *R/Simulation_Stansamplesummarytolist_Fixeffect.R
 6ddaddf1944e14ce2f08bac6f1605f7e *R/Simulation_Stansamplesummarytolist_Mixeffect.R
