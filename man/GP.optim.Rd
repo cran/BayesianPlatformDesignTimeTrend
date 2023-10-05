@@ -6,34 +6,44 @@
 \usage{
 GP.optim(
   x,
-  y,
+  y.t1E,
+  y.pow = NA,
+  ESS = NA,
   errorrate = 0.05,
   confidence.level = 0.95,
-  grid.length = 5000,
+  grid.length = 1000,
   change.scale = FALSE,
   noise = T,
   grid.min,
-  grid.max
+  grid.max,
+  Boundary.type = "Symmetric"
 )
 }
 \arguments{
 \item{x}{A numeric vector of cutoff data}
 
-\item{y}{A numeric vector of error rate data}
+\item{y.t1E}{A numeric vector of type I error rate data}
 
-\item{errorrate}{A numeric value. The error rate we want to achieve. Error rate here means type I error rate or family-wise error rate. Default is 0.05.}
+\item{y.pow}{A numeric vector of power data. You can input conjucntive, disconjunctive and marginal power data. Default is NA. Only used when Boundary.type == "Asymmetric"}
+
+\item{ESS}{A matrix of effective sample size. This is only called for asymmetric boundary cutoff screening. Default is NA for symmetric boundary.
+The first column is the ESS for different cutoff pair under the null scenario, the second column is the ESS for different cutoff pair under the alternative scenario.}
+
+\item{errorrate}{'errorrate' refers to the target of type I error rate or family-wise error rate. Default is 0.05. User can change it to 0.1 for FWER if they think 0.05 is too conservative. The per-hypothesis type I error equals errorrate / (K-1) where (K-1) is the number of treatment arms.}
 
 \item{confidence.level}{A numeric value indicating the confidence level of estimate. Default is 0.95}
 
-\item{grid.length}{A numeric value indicating the grid resolution. Default is 5000.}
+\item{grid.length}{A numeric value indicating the grid resolution. Default is 1000.}
 
 \item{change.scale}{A logic value indicating whether we want to change scale when doing Gaussian process. Default is FALSE.}
 
 \item{noise}{A logic value indicating whether the input x is noisy. Default is TRUE.}
 
-\item{grid.min}{A numeric value indicating the lower bound of the grid for screening.}
+\item{grid.min}{A numeric value or vector (for asymmetric boundary) indicating the lower bound of the grid for screening. For asymmetric boundary, the first value is efficacy minimum value and the second value is futility minimum value.}
 
-\item{grid.max}{A numeric value indicating the upper bound of the grid for screening.}
+\item{grid.max}{A numeric value or vector (for asymmetric boundary) indicating the upper bound of the grid for screening. For asymmetric boundary, the first value is efficacy maximum value and the second value is futility maximum value.}
+
+\item{Boundary.type}{A text indicating what type of boundary used. Default is "Symmetric"}
 }
 \value{
 A list including the next cutoff value for evaluation \code{next.cutoff} and a list of predictions for screening grid.
@@ -46,15 +56,45 @@ x = c(7.123968, 6.449631, 1.984406,
 3.507463, 4.972510, 2.925768,
 5.816682, 4.367796,
 7.349160, 1.113648)
-y = c(0.0396, 0.0450,
+y.t1E = c(0.0396, 0.0450,
 0.5116, 0.2172,
 0.1040, 0.3058,
 0.0592, 0.1384,
 0.0296, 0.7936)
 grid.min=1
 grid.max=8
-GP.res=GP.optim(x=x, y=y, errorrate = 0.1, grid.min = grid.min, grid.max = grid.max)
+GP.res=GP.optim(x=x, y.t1E=y.t1E, errorrate = 0.1, grid.min = grid.min, grid.max = grid.max)
 GP.res$next.cutoff
+
+x =  data.frame(matrix(c(
+0.9563408, 0.006295626,
+0.9669739, 0.014395030,
+0.9959410, 0.034858339,
+0.9635357, 0.048435579,
+0.9794314, 0.021659226,
+0.9552201, 0.018442535,
+0.9655374, 0.035281833,
+0.9837123, 0.010656442,
+0.9974910, 0.047741842,
+0.9989172, 0.012982826), byrow=TRUE, ncol = 2))
+y.t1E = c(0.3044, 0.2938, 0.2573, 0.4780, 0.2923, 0.3733, 0.4263, 0.1962, 0.2941, 0.1131)
+y.pow = c(0.8300, 0.8239, 0.7102, 0.7291, 0.8205, 0.7984, 0.7709, 0.8418, 0.6359, 0.5609)
+ESS = data.frame(matrix(c(
+594.672, 560.580,
+596.148, 566.328,
+597.840, 590.124,
+590.052, 544.800,
+597.024, 574.716,
+593.952, 554.580,
+593.676, 554.400,
+598.500, 583.896,
+595.740, 590.520,
+599.580, 598.644),byrow=TRUE,ncol=2))
+grid.min=c(0.95,0)
+grid.max=c(1,0.05)
+GP.res_asy=GP.optim(x=x, y.t1E=y.t1E, y.pow=y.pow, ESS=ESS,errorrate = 0.1,
+grid.min = grid.min, grid.max = grid.max, Boundary.type="Asymmetric")
+GP.res_asy$next.cutoff
 }
 \references{
 Surrogates: Gaussian process modeling, design, and optimization for the applied sciences. CRC press. Gramacy, R.B., 2020.

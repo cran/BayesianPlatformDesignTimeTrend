@@ -9,9 +9,9 @@ data {
   int <lower=0> beta1_nu;
   
   int<lower=1> N;  // total number of observations
-  int y[N];  // response variable
+  array[N] int y;  // response variable
   int<lower=1> K;  // number of population-level effects
-  int <lower=0, upper=K> z[N]; // arm applied on trial n
+  array[N] int <lower=0, upper=K> z; // arm applied on trial n
    matrix[N, K] x;  // population-level design matrix
 }
 transformed data {

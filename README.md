@@ -3,40 +3,69 @@
 
 # BayesianPlatformDesignTimeTrend
 
-<!-- badges: start -->
-<!-- badges: end -->
-
 The goal of BayesianPlatformDesignTimeTrend is to simulates the
 multi-arm multi-stage or platform trial with Bayesian approach using the
 ‘rstan’ package, which provides the R interface for to the stan. The
 package uses Thall’s and Trippa’s randomisation approach for Bayesian
 adaptive randomisation. In addition, the time trend problem of platform
-trial can be studied in this package. There is a demo for multi-arm
-multi-stage trial for two different null scenario in this package.
+trial can be studied in this package. There are a some demos for the
+simulation process of cutoff screening, hyperprameter tuning and design
+evaluation in this package.
 
 ## Installation
 
-You can install the ‘BayesianPlatformDesignTimeTrend’ package 1.1.1 like
+You can install the ‘BayesianPlatformDesignTimeTrend’ package 1.2.0 like
 so:
 
 ``` r
 # install.packages("BayesianPlatformDesignTimeTrend")
-# devtools::install_github("ZXW834/PlatFormDesignTime", build_vignettes = TRUE)
+# devtools::install_github("ZXW834/BayesianPlatformDesignTimeTrend", build_vignettes = TRUE)
 ```
+
+## Bayesian simulation process overview
+
+In the design, $K$ intervention arms are evaluated compared to a shared
+control. During the trial, there are several interim analyses for
+decision making to claim superiority of each arm (Oneside test) or both
+inferiority and superiority of each arm (Twoside test). There are
+several parameters can be tuned which are cutoff values of stopping
+boundaries and the hyperparameters of Trippa’s adaptive randomisation
+approach. The below figures illustrate how to do design evaluation using
+this package. We need to set up the design first and start with cutoff
+screening to control the FWER and maximise the power. If the
+investigator want to tune hyperparameters of Trippa’s approach to
+maximise the power further, the randomisation method in cutoff screening
+process should be adaptive randomisation (Eg.Thall’s approach). We found
+that after fixing the cutoff value, the change of adaptive randomisation
+method does not inflate the FWER. After finding the cutoff (and
+hyperparameter), the design is fixed and can be evaluated. If
+investigator wants to compare the design with different maximum sample
+size, just use the same cutoff (and hyperparameter) and only change the
+sample size parameter to create a new design for evaluation.
+<img src="./man/figures/Asymmetric.png" width="70%" style="display: block; margin: auto;" /><img src="./man/figures/Trippa.png" width="70%" style="display: block; margin: auto;" /><img src="./man/figures/Designevaluationwhiteback.png" width="70%" style="display: block; margin: auto;" />
 
 ## Demo
 
 -   `Demo_CutoffScreening()` is a demo function performing cutoff
-    screening process
+    screening process where simple linear model is fit
+-   `Demo_CutoffScreening_GP()` is a demo function performing cutoff
+    screening process where Gaussian process is fit and active learning
+    is used
 -   `Demo_multiplescrenariotrialsimulation()` is a demo function
     performing MAMS trial simulation
 
 ## Tutorials
 
 -   `MAMS-CutoffScreening-tutorial` is a tutorial document of how to do
-    cutoff screening under Bayesian MAMS trial
+    cutoff screening under Bayesian MAMS trial fitting linear model.
+-   `MAMS-CutoffScreening-GP-Asymmetric-tutorial` is a tutorial document
+    of how to do symmetric cutoff screening under Bayesian MAMS trial
+    fitting the Gaussian process.
+-   `MAMS-CutoffScreening-GP-Symmetric-tutorial` is a tutorial document
+    of how to do asymmetric cutoff screening under Bayesian MAMS trial
+    fitting the Gaussian process.
 -   `MAMS-trial-simulation-tutorial` is a tutorial document of how to do
-    Bayesian MAMS trial simulation with or without time trend
+    Bayesian MAMS trial simulation with or without time trend.
 
 ## Example
 

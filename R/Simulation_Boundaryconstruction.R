@@ -58,8 +58,8 @@ Boundaryconstruction = function(Stopbound.inf = Stopbound.inf, ns = ns) {
       }
     }
     else if (Stoptype == "Early-OBF") {
-      cutoffeff = pnorm(sqrt(stage / seq(1:stage) * cutoff.temp[1]))
-      cutoffful = pnorm(-sqrt(stage / seq(1:stage) * cutoff.temp[2]))
+      cutoffeff = pnorm(sqrt(stage / seq(1:stage)) * cutoff.temp[1])
+      cutoffful = pnorm(-sqrt(stage / seq(1:stage)) * cutoff.temp[2])
       if (var(cutoff.temp) != 0) {
         stop(
           "Error: For symmetric OBF boundary, the cutoff for efficacy and fultility should be the same. The function will atuomatically construct an symmetric boundary set. cutoff can be greater than 1"
@@ -104,8 +104,8 @@ Boundaryconstruction = function(Stopbound.inf = Stopbound.inf, ns = ns) {
       }
     }
     else if (Stoptype == "Early-OBF") {
-      cutoffeff = pnorm(sqrt(stage / seq(1:stage) * cutoff.temp[1]))
-      cutoffful = pnorm(-sqrt(stage / seq(1:stage) * cutoff.temp[2]))
+      cutoffeff = pnorm(sqrt(stage / seq(1:stage)) * cutoff.temp[1])
+      cutoffful = pnorm(-sqrt(stage / seq(1:stage)) * cutoff.temp[2])
       if (var(cutoff.temp) == 0) {
         stop(
           "Error: For Asymmetric OBF boundary, the cutoff for efficacy and fultility should be the different. The function will atuomatically construct a asymmetric boundary set. cutoff can be greater than 1"

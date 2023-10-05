@@ -11,8 +11,10 @@
 #' @param n The vector of sample size for each arm
 #' @param tuningparameter The tuning parameter indicator for Thall's approach
 #' @param c The tuning parameter for Thall's approach
+#' @param a The hyperparamter parameter for Trippa's approach
+#' @param b The hyperparamter parameter for Trippa's approach
 #' @param post.prob.best Posterior probability of each arm to be the best
-#' @param max.ar The upper boundary for randomisation ratio for each arm
+#' @param max.ar The upper boundary for randomisation ratio for each arm, which is used in Thall's approach since Trippa's approach has protection on control arm.
 #' @param armleft The number of treatment left in the platform (>2)
 #' @param treatmentindex The vector of treatment arm index excluding the control arm whose index is 0
 #'
@@ -35,6 +37,22 @@
 #' armleft = 2,
 #' treatmentindex = 1)
 #'
+#' ARmethod(Fixratio = FALSE,
+#' BARmethod = "Trippa",
+#' group = 1,
+#' stats = matrix(rep(NA, 40), ncol = 8, nrow = 5),
+#' post.prob.btcontrol = c(0.5, 0.6),
+#' K = 3,
+#' n = c(30, 30, 40),
+#' tuningparameter = NA,
+#' c = NA,
+#' a = 3,
+#' b = 0.75,
+#' post.prob.best = c(0.3, 0.3, 0.4),
+#' max.ar = NA,
+#' armleft = 3,
+#' treatmentindex = c(1, 2))
+#'
 #' @references Bayesian adaptive randomized trial design for patients with recurrent glioblastoma. Trippa, Lorenzo, Eudocia Q. Lee, Patrick Y. Wen, Tracy T. Batchelor, Timothy Cloughesy, Giovanni Parmigiani, and Brian M. Alexander. Journal of Clinical Oncology 30, no. 26 (2012): 3258.
 #'     A simulation study of outcome adaptive randomization in multi-arm clinical trials. Wathen, J. Kyle, and Peter F. Thall. Clinical Trials 14, no. 5 (2017): 432-440.
 #'
@@ -46,35 +64,46 @@ ARmethod = function(Fixratio,
                     post.prob.btcontrol,
                     K,
                     n,
-                    tuningparameter,
-                    c,
+                    tuningparameter = NA,
+                    c = NA,
+                    a = NA,
+                    b = NA,
                     post.prob.best,
-                    max.ar,
+                    max.ar = NA,
                     armleft,
                     treatmentindex) {
   # Validate inputs
   if (!is.logical(Fixratio)) stop("Error: Fixratio should be a logical value (TRUE/FALSE)")
   if (!is.character(BARmethod)) stop("Error: BARmethod should be a character value")
   if (!is.numeric(group) || group <= 0) stop("Error: group should be a positive numeric value")
-  if (!is.numeric(max.ar) || max.ar <= 0 || max.ar >= 1) stop("Error: max.ar should be a numeric value between 0 and 1")
+  if (BARmethod == "Thall" & (!is.numeric(max.ar) || max.ar <= 0 || max.ar >= 1)) stop("max.ar should be a numeric value between 0 and 1 for Thall's approach")
+  if (BARmethod == "Trippa" & (!is.numeric(a) || !is.numeric(b))) stop("hyperparameters a and b should be a numeric value for Trippa's approach")
   if (K < 2) stop("Error: K should be an integer value greater than or equal to 2")
 
   #---------------------Trippa's approach---------------------
   if (Fixratio == F & BARmethod == "Trippa") {
     ##Tuning the paprameter using method mentioned in Trippa's paper (2014)
-    gamma_stage = 10 * ((group / dim(stats)[1])) ^ 0.75
+    gamma_stage = a * ((group / dim(stats)[1])) ^ b
     eta_stage = 0.25 * (group / dim(stats)[1])
     ##Reweigh the allocation probability
     ###K >= 1, treatment group
+
     allocate_trt = post.prob.btcontrol ^ gamma_stage / sum(post.prob.btcontrol ^
                                                              gamma_stage)
     ###k = 0, control group
-    allocate_control = 1 / K * (exp(max(n[-1]) - n[1])) ^ eta_stage
+    allocate_control = 1 / (armleft - 1) * (exp(max(n[-1]) - n[1])) ^ eta_stage
 
     sum_pi = allocate_control + sum(allocate_trt)
     alloc.prob.btcontrol = c(allocate_control / sum_pi, allocate_trt / sum_pi)
 
-    randomprob = alloc.prob.btcontrol
+    rpk = matrix(rep(0,armleft),ncol = armleft)
+    randomprob = matrix(rep(0,K),ncol = K)
+    colnames(rpk) = c(1,treatmentindex+1)
+    colnames(randomprob) = seq(1,K)
+    rpk[1] = alloc.prob.btcontrol[1]
+    rpk[-1] = alloc.prob.btcontrol[-1]
+    rpk = rpk/sum(rpk)
+    randomprob[as.numeric(colnames(rpk))] = randomprob[as.numeric(colnames(rpk))]+rpk
   }
 
   #---------------------Thall's approach---------------------

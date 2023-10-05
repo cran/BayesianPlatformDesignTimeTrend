@@ -2,9 +2,9 @@ data {
   int<lower=1> N;  // number of patients
   int<lower=1> K;  // number of treatment arms
   int<lower=1> groupmax;  // number of time points
-  int<lower=1, upper=K> X[N];  // predictor variable
-  int<lower=0, upper=1> Y[N];  // response variable
-  int<lower=1> group[N];
+  array[N] int<lower=1, upper=K> X;  // predictor variable
+  array[N] int<lower=0, upper=1> Y;  // response variable
+  array[N] int<lower=1> group;
 }
 
 parameters {

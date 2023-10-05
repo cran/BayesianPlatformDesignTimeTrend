@@ -13,7 +13,7 @@
 <meta name="author" content="Ziyan Wang" />
 
 
-<title>MAMS-CutoffScreening-GP-tutorial</title>
+<title>MAMS-CutoffScreening-GP-Symmetric-tutorial</title>
 
 <script src="data:application/javascript;base64,Ly8gUGFuZG9jIDIuOSBhZGRzIGF0dHJpYnV0ZXMgb24gYm90aCBoZWFkZXIgYW5kIGRpdi4gV2UgcmVtb3ZlIHRoZSBmb3JtZXIgKHRvCi8vIGJlIGNvbXBhdGlibGUgd2l0aCB0aGUgYmVoYXZpb3Igb2YgUGFuZG9jIDwgMi44KS4KZG9jdW1lbnQuYWRkRXZlbnRMaXN0ZW5lcignRE9NQ29udGVudExvYWRlZCcsIGZ1bmN0aW9uKGUpIHsKICB2YXIgaHMgPSBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCJkaXYuc2VjdGlvbltjbGFzcyo9J2xldmVsJ10gPiA6Zmlyc3QtY2hpbGQiKTsKICB2YXIgaSwgaCwgYTsKICBmb3IgKGkgPSAwOyBpIDwgaHMubGVuZ3RoOyBpKyspIHsKICAgIGggPSBoc1tpXTsKICAgIGlmICghL15oWzEtNl0kL2kudGVzdChoLnRhZ05hbWUpKSBjb250aW51ZTsgIC8vIGl0IHNob3VsZCBiZSBhIGhlYWRlciBoMS1oNgogICAgYSA9IGguYXR0cmlidXRlczsKICAgIHdoaWxlIChhLmxlbmd0aCA+IDApIGgucmVtb3ZlQXR0cmlidXRlKGFbMF0ubmFtZSk7CiAgfQp9KTsK"></script>
 
@@ -146,23 +146,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<h1 class="title toc-ignore">MAMS-CutoffScreening-GP-tutorial</h1>
+<h1 class="title toc-ignore">MAMS-CutoffScreening-GP-Symmetric-tutorial</h1>
 <h4 class="author">Ziyan Wang</h4>
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BayesianPlatformDesignTimeTrend)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: rstan</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: StanHeaders</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Loading required package: ggplot2</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; rstan (Version 2.21.8, GitRev: 2e1f913d3ca3)</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; For execution on a local, multicore CPU with excess RAM we recommend calling</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; options(mc.cores = parallel::detectCores()).</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; To avoid recompilation of unchanged Stan programs, we recommend calling</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; rstan_options(auto_write = TRUE)</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(BayesianPlatformDesignTimeTrend)</span></code></pre></div>
 <div id="four-arm-trial-cutoff-screening" class="section level2">
 <h2>Four arm trial cutoff screening</h2>
-<p>The ‘BayesianPlatformDesignTimeTrend’ package simulation process requires stopping boundary cutoff screening first (details refers to demo  and MAMS-CutoffScreening-GP-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be ‘linear’. The way of time trend impacting the beginning response probability is set to be ‘mult’ (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall’s approach. The early stop boundary is the symmetric OBF boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.</p>
+<p>The ‘BayesianPlatformDesignTimeTrend’ package simulation process requires stopping boundary cutoff screening first (details refers to demo  and MAMS-CutoffScreening-GP-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. In this tutorial, the cutoff screening process for symmertic boundary will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be ‘linear’. The way of time trend impacting the beginning response probability is set to be ‘mult’ (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall’s approach. The early stop boundary is the symmetric OBF boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ntrials <span class="ot">=</span> <span class="dv">1000</span> <span class="co"># Number of trial replicates</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ns <span class="ot">=</span> <span class="fu">seq</span>(<span class="dv">120</span>, <span class="dv">600</span>, <span class="dv">60</span>) <span class="co"># Sequence of total number of accrued patients at each interim analysis</span></span>
@@ -217,8 +209,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Call the main function</span></span>
 <span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>  <span class="at">grid.inf =</span> <span class="fu">list</span>(</span>
 <span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a>    <span class="at">start.length =</span> <span class="dv">10</span>,</span>
-<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    grid.min,</span>
-<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    grid.max,</span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid.min =</span> <span class="cn">NULL</span>,</span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid.max =</span> <span class="cn">NULL</span>,</span>
 <span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    <span class="at">confidence.level =</span> <span class="fl">0.95</span>,</span>
 <span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">grid.length =</span> <span class="dv">5000</span>,</span>
 <span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a>    <span class="at">change.scale =</span> <span class="cn">FALSE</span>,</span>
@@ -294,7 +286,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>Summary of the output data from cutoff screening example</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Details of grid</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>optimdata<span class="ot">=</span>optimdata</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>optimdata<span class="ot">=</span>optimdata_sym</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Recommend cutoff at each screening round</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>nextcutoff <span class="ot">=</span> optimdata<span class="sc">$</span>next.cutoff</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>prediction <span class="ot">=</span> optimdata<span class="sc">$</span>prediction</span>
@@ -303,10 +295,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>cutoff<span class="ot">=</span>cutoff[<span class="dv">1</span><span class="sc">:</span><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(tpIE))]</span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>tpIE<span class="ot">=</span>tpIE[<span class="dv">1</span><span class="sc">:</span><span class="fu">sum</span>(<span class="sc">!</span><span class="fu">is.na</span>(tpIE))]</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>GP.res <span class="ot">=</span> optimdata</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>prediction <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">yhat =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>yhat,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">sd =</span> <span class="fu">matrix</span>(GP.res<span class="sc">$</span>prediction<span class="sc">$</span>sd,<span class="at">ncol=</span><span class="dv">1</span>),</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="at">qup =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>qup,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                        <span class="at">qdown =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>qdown,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>prediction <span class="ot">=</span> <span class="fu">data.frame</span>(<span class="at">yhat =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>yhat.t1E,</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                        <span class="at">sd =</span> <span class="fu">matrix</span>(GP.res<span class="sc">$</span>prediction<span class="sc">$</span>sd.t1E,<span class="at">ncol=</span><span class="dv">1</span>),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                        <span class="at">qup =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>qup.t1E,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                        <span class="at">qdown =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>qdown.t1E,</span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                        <span class="at">xgrid =</span> GP.res<span class="sc">$</span>prediction<span class="sc">$</span>xgrid)</span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>GPplot<span class="ot">=</span><span class="fu">ggplot</span>(<span class="at">data =</span> prediction) <span class="sc">+</span></span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">x =</span> xgrid, <span class="at">ymin =</span> qdown, <span class="at">ymax =</span> qup),<span class="at">col=</span><span class="st">&quot;#f8766d&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>,<span class="at">linetype =</span> <span class="dv">2</span>) <span class="sc">+</span></span>

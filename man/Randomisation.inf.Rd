@@ -6,7 +6,8 @@
 \usage{
 Randomisation.inf(
   Random.inf = list(Fixratio = FALSE, Fixratiocontrol = NA, BARmethod = "Thall",
-    Thall.tuning.inf = list(tuningparameter = "Fixed", fixvalue = 1))
+    Thall.tuning.inf = list(tuningparameter = "Fixed", fixvalue = 1), Trippa.tuning.inf =
+    list(a = 10, b = 0.75))
 )
 }
 \arguments{
@@ -27,7 +28,8 @@ Randomisation.inf(Random.inf = list(
 Fixratio = FALSE,
 Fixratiocontrol = NA,
 BARmethod = "Thall",
-Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1)
+Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
+Trippa.tuning.inf = list(a = NA, b = NA)
 ))
 }
 \author{

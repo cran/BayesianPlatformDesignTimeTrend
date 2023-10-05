@@ -13,10 +13,12 @@ ARmethod(
   post.prob.btcontrol,
   K,
   n,
-  tuningparameter,
-  c,
+  tuningparameter = NA,
+  c = NA,
+  a = NA,
+  b = NA,
   post.prob.best,
-  max.ar,
+  max.ar = NA,
   armleft,
   treatmentindex
 )
@@ -40,9 +42,13 @@ ARmethod(
 
 \item{c}{The tuning parameter for Thall's approach}
 
+\item{a}{The hyperparamter parameter for Trippa's approach}
+
+\item{b}{The hyperparamter parameter for Trippa's approach}
+
 \item{post.prob.best}{Posterior probability of each arm to be the best}
 
-\item{max.ar}{The upper boundary for randomisation ratio for each arm}
+\item{max.ar}{The upper boundary for randomisation ratio for each arm, which is used in Thall's approach since Trippa's approach has protection on control arm.}
 
 \item{armleft}{The number of treatment left in the platform (>2)}
 
@@ -70,6 +76,22 @@ post.prob.best = c(0.5, 0.5),
 max.ar = 0.75,
 armleft = 2,
 treatmentindex = 1)
+
+ARmethod(Fixratio = FALSE,
+BARmethod = "Trippa",
+group = 1,
+stats = matrix(rep(NA, 40), ncol = 8, nrow = 5),
+post.prob.btcontrol = c(0.5, 0.6),
+K = 3,
+n = c(30, 30, 40),
+tuningparameter = NA,
+c = NA,
+a = 3,
+b = 0.75,
+post.prob.best = c(0.3, 0.3, 0.4),
+max.ar = NA,
+armleft = 3,
+treatmentindex = c(1, 2))
 
 }
 \references{

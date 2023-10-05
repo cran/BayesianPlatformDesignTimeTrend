@@ -62,8 +62,8 @@ library(BayesianPlatformDesignTimeTrend)
 #    # Call the main function
 #    grid.inf = list(
 #      start.length = 10,
-#      grid.min,
-#      grid.max,
+#      grid.min = NULL,
+#      grid.max = NULL,
 #      confidence.level = 0.95,
 #      grid.length = 5000,
 #      change.scale = FALSE,
@@ -141,7 +141,7 @@ library(BayesianPlatformDesignTimeTrend)
 ## -----------------------------------------------------------------------------
 library(ggplot2)
 # Details of grid
-optimdata=optimdata
+optimdata=optimdata_sym
 # Recommend cutoff at each screening round
 nextcutoff = optimdata$next.cutoff
 prediction = optimdata$prediction
@@ -150,10 +150,10 @@ tpIE=optimdata$tpIE
 cutoff=cutoff[1:sum(!is.na(tpIE))]
 tpIE=tpIE[1:sum(!is.na(tpIE))]
 GP.res = optimdata
-prediction = data.frame(yhat = GP.res$prediction$yhat,
-                        sd = matrix(GP.res$prediction$sd,ncol=1),
-                        qup = GP.res$prediction$qup,
-                        qdown = GP.res$prediction$qdown,
+prediction = data.frame(yhat = GP.res$prediction$yhat.t1E,
+                        sd = matrix(GP.res$prediction$sd.t1E,ncol=1),
+                        qup = GP.res$prediction$qup.t1E,
+                        qdown = GP.res$prediction$qdown.t1E,
                         xgrid = GP.res$prediction$xgrid)
 GPplot=ggplot(data = prediction) +
         geom_ribbon(aes(x = xgrid, ymin = qdown, ymax = qup),col="#f8766d", alpha = 0.5,linetype = 2) +

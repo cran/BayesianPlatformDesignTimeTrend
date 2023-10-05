@@ -1,8 +1,8 @@
 data {
   int<lower=1> K; // number of  arms
   int<lower=0> N; // number of trials
-  int<lower=1, upper=K> z[N]; // arm on trial n
-  int<lower=0, upper=1> y[N]; // outcome on trial n
+  array[N] int<lower=1, upper=K> z; // arm on trial n
+  array[N] int<lower=0, upper=1> y; // outcome on trial n
   real <lower=0> pistar;
   int <lower=0> pess;
 }

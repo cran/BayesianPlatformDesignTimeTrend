@@ -10,17 +10,19 @@ demo_Cutoffscreening.GP(
   grid.inf = list(start.length = 10, grid.min = NULL, grid.max = NULL, confidence.level =
     0.95, grid.length = 5000, change.scale = FALSE, noise = TRUE, errorrate = 0.1,
     simulationerror = 0.01, iter.max = 15, plotornot = FALSE),
-  input.info = list(response.probs = c(0.15, 0.15, 0.15, 0.15), ns = c(120, 240, 360,
-    480, 600), max.ar = 0.85, rand.algo = "Urn", max.deviation = 3, model.inf =
-    list(model = "tlr", ibb.inf = list(pi.star = 0.5, pess = 2, betabinomialmodel =
-    ibetabinomial.post), tlr.inf = list(beta0_prior_mu = 0, beta1_prior_mu = 0,
-    beta0_prior_sigma = 2.5, beta1_prior_sigma = 2.5, beta0_df = 7, beta1_df = 7, reg.inf
-    = "main", variable.inf = "Fixeffect")), Stop.type = "Early-OBF", Boundary.type =
-    "Symmetric", Random.inf = list(Fixratio = FALSE, 
-     Fixratiocontrol = NA,
-    BARmethod = "Thall", Thall.tuning.inf = list(tuningparameter = "Unfixed", fixvalue =
-    1)), trend.inf = list(trend.type = "step", trend.effect = c(0, 0, 0, 0),
-    trend_add_or_multip = "mult")),
+  power.type = NA,
+  response.probs.alt = NA,
+  input.info = list(response.probs.null = c(0.4, 0.4, 0.4, 0.4), ns = c(120, 240, 360,
+    480, 600), max.ar = 0.85, rand.algo = "Urn", max.deviation = 3, test.type =
+    "Twoside", model.inf = list(model = "tlr", ibb.inf = list(pi.star = 0.5, pess = 2,
+    betabinomialmodel = ibetabinomial.post), tlr.inf = list(beta0_prior_mu = 0,
+    beta1_prior_mu = 0, beta0_prior_sigma = 2.5, beta1_prior_sigma = 2.5, beta0_df = 7,
+    beta1_df = 7, reg.inf = "main", variable.inf = "Fixeffect")), Stop.type =
+    "Early-OBF", Boundary.type = "Symmetric", 
+     Random.inf = list(Fixratio = FALSE,
+    Fixratiocontrol = NA, BARmethod = "Thall", Thall.tuning.inf = list(tuningparameter =
+    "Unfixed", fixvalue = 1)), trend.inf = list(trend.type = "step", trend.effect = c(0,
+    0, 0, 0), trend_add_or_multip = "mult")),
   cl = 2
 )
 }
@@ -30,15 +32,22 @@ demo_Cutoffscreening.GP(
 \item{trial.fun}{The function of trial simulation, related to MainFunction.R}
 
 \item{grid.inf}{A list of grid information to create start grid and extend grid for cutoff screening.
-'start.length' is the size of start grid. Default is 10. 'grid.min' is the lower bound for screening grid.
-'grid.max' is the upper bound for screening grid. 'errorrate' refers to the target of type I error rate or family-wise error rate.
+'start.length' is the size of start grid. Default is 10.
+'grid.min' A numeric value or vector (for asymmetric boundary) indicating the lower bound of the grid for screening. For asymmetric boundary, the first value is efficacy minimum value and the second value is futility minimum value.
+'grid.max' A numeric value or vector (for asymmetric boundary) indicating the upper bound of the grid for screening. For asymmetric boundary, the first value is efficacy maximum value and the second value is futility maximum value.
+'errorrate' refers to the target of type I error rate or family-wise error rate. Default is 0.05. User can change it to 0.1 for FWER if they think 0.05 is too conservative. The per-hypothesis type I error equals errorrate / (K-1) where (K-1) is the number of treatment arms.
 'confidence.level' is a numeric value indicating the confidence level of estimate. Default is 0.95.
-'grid.length' is the accuracy of grid. Default is 5000.
+'grid.length' A numeric value indicating the grid resolution. Default is 5000 for symmetric boundary. For asymmetric boundary, the length of grid is 101 for both efficacy grid and futility grid. A numeric value indicating the grid resolution. Default is 5000 for symmetric boundary. For asymmetric boundary, the length of grid is 101 for both efficacy grid and futility grid.
 'change.scale' is a logic value indicating whether we want to change scale when doing Gaussian process. Default is FALSE.
 'noise' is a logic value indicating whether the input x is noisy. Default is TRUE.
 'simulationerror' is a numeric value indicating the tolerable error for simulated type I error rate. Default is 0.01,
 'iter.max' is a numeric value indicating the maximum number of evaluations. Default is 15.
 'plotornot' is a logic value indicating whether the errorrate vs grid plot needed to be generated at each iteration. Default is FALSE.}
+
+\item{power.type}{A indicator of which type of power we need to optimise when tuning the cutoff value for asymmetric boundary. Default is NA (Symmetric boundary).
+The choice of power type is Conjunctive power ("Conjunctive") and Disconjunctive power ("Disconjunctive"). In a two arm trial design, these power type are the same.}
+
+\item{response.probs.alt}{A vector of response probability of each arm under the alternative scenario. This is used for power optimisation when tuning the cutoff values for asymmetric boundary. Default is NA.}
 
 \item{input.info}{A list of input information including all information required for trial simulation.}
 
@@ -51,17 +60,77 @@ A vector of recommended cutoff. The final value is the latest recommended value.
 This function does a cutoff screening for trial simulation using Bayesian optimisation.
 }
 \examples{
-\donttest{demo_Cutoffscreening.GP(ntrials = 2, cl = 2,
-    grid.inf = list(
-    start.length = 10,
-    confidence.level = 0.95,
-    grid.length = 5000,
-    change.scale = FALSE,
-    noise = TRUE,
-    errorrate = 0.1,
-    simulationerror = 0.01,
-    iter.max = 15,
-    plotornot = FALSE))}
+\donttest{
+#Two arm asymmetric boundary screening. Default is OBF boundary.
+demo_Cutoffscreening.GP(ntrials = 2, cl = 2,
+ power.type = NA,
+ response.probs.alt = NA,
+ grid.inf = list(
+ start.length = 10,
+ confidence.level = 0.95,
+ grid.length = 5000,
+ change.scale = FALSE,
+ noise = TRUE,
+ errorrate = 0.1,
+ simulationerror = 0.01,
+ iter.max = 15,
+ plotornot = FALSE))
+
+ #Four arm asymmetric OBF boundary screening where conjunctive power is optimised.
+ demo_Cutoffscreening.GP(ntrials = 2, cl = 2,
+ power.type = "Conjunctive",
+ response.probs.alt = c(0.4,0.6,0.6,0.4),
+ grid.inf = list(
+ start.length = 10,
+ confidence.level = 0.95,
+ grid.length = 101,
+ change.scale = FALSE,
+ noise = TRUE,
+ errorrate = 0.1,
+ simulationerror = 0.01,
+ iter.max = 15,
+ plotornot = FALSE))
+ input.info = list(
+ response.probs.null = c(0.4,0.4,0.4,0.4),
+ ns = c(120, 240, 360, 480, 600),
+ max.ar = 0.85,
+ rand.algo = "Urn",
+ max.deviation = 3,
+ test.type = "Twoside",
+ model.inf = list(
+ model = "tlr",
+ ibb.inf = list(
+ pi.star = 0.5,
+ pess = 2,
+ betabinomialmodel = ibetabinomial.post
+ ),
+ tlr.inf = list(
+ beta0_prior_mu = 0,
+ beta1_prior_mu = 0,
+ beta0_prior_sigma = 2.5,
+ beta1_prior_sigma = 2.5,
+ beta0_df = 7,
+ beta1_df = 7,
+ reg.inf =  "main",
+ variable.inf = "Fixeffect"
+ )
+ ),
+ Stop.type = "Early-OBF",
+ Boundary.type = "Asymmetric",
+ Random.inf = list(
+ Fixratio = FALSE,
+ Fixratiocontrol = NA,
+ BARmethod = "Thall",
+ Thall.tuning.inf = list(tuningparameter = "Unfixed",  fixvalue = 1)
+ ),
+ trend.inf = list(
+ trend.type = "step",
+ trend.effect = c(0, 0, 0, 0),
+ trend_add_or_multip = "mult"
+ )
+ )
+ }
+
 }
 \author{
 Ziyan Wang

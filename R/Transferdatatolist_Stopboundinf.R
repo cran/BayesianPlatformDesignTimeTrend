@@ -40,10 +40,10 @@ Stopboundinf = function(Stop.type="Early-Pocock", Boundary.type="Symmetric", cut
     }
   }
   else if (Boundary.type == "Asymmetric") {
-    if (sum(Stop.type == c("Early-Pocock","Noearly")) & cutoff[1] != cutoff[2]) {
+    if (sum(Stop.type == c("Early-Pocock","Noearly")) & sum(cutoff) != 1) {
       cutofftemp = cutoff
     }
-    else if (sum(cutoff) != 1) {
+    else if (Stop.type == "Early-OBF" & cutoff[1] != cutoff[2]) {
       cutofftemp = cutoff
     }
     else{

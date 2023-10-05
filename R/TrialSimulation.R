@@ -24,6 +24,7 @@ Trial.simulation = function(ntrials = 5000,
                               response.probs = c(0.4, 0.4),
                               ns = c(30, 60, 90, 120, 150),
                               max.ar = 0.75,
+                              test.type = "Twoside",
                               rand.algo = "Urn",
                               max.deviation = 3,
                               model.inf = list(
@@ -53,7 +54,8 @@ Trial.simulation = function(ntrials = 5000,
                                 Fixratio = FALSE,
                                 Fixratiocontrol = NA,
                                 BARmethod = "Thall",
-                                Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1)
+                                Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
+                                Trippa.tuning.inf = list(a = 10, b = 0.75)
                               ),
                               trend.inf = list(
                                 trend.type = "step",
@@ -101,6 +103,7 @@ Trial.simulation = function(ntrials = 5000,
   #-----------------------------------------
   result = foreach(icount(ntrials)) %dopar% trial.fun(
     response.probs = input.info$response.probs,
+    test.type = input.info$test.type,
     ns = input.info$ns,
     max.ar = input.info$max.ar,
     rand.algo = input.info$rand.algo,
@@ -111,7 +114,7 @@ Trial.simulation = function(ntrials = 5000,
     trend.inf = input.info$trend.inf
   )
   #Save output data
-  FWER = FWER_disconjunctivepowerfunc(result)
+  FWER = conjuncativepower_or_FWER(result,input.info$response.probs,test.type = input.info$test.type)
   TIE_POWER = rbind(TIE_POWER, FWER)
   meanres = Meanfunc(result) - (logit(input.info$response.probs[-1]) - logit(input.info$response.probs[1]))
   # varres=Varfunc(result)

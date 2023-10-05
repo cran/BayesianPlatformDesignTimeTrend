@@ -2,6 +2,7 @@
 #' @description This function simulates a MAMS trial applying adaptive methods where the time trend effect can be studied.
 #' @param ii Meaning less parameter but required for foreach function in doParallel package
 #' @param response.probs A vector of true response probability for each arm. Default response.probs = c(0.4, 0.4).
+#' @param test.type A indicator of whether to use one side test or two side test for each treatment-control comparison.
 #' @param ns  A vector of accumulated number of patient at each stage. Default is ns = c(30, 60, 90, 120, 150).
 #' @param max.ar The upper boundary for randomisation ratio for each arm. Default is 0.75 for a two arm trial. The minimum value depends on K where 1 - max.ar <= 1/K
 #' @param rand.algo The method of applying patient allocation with a given randomisation probability vector. Default is "Urn".
@@ -19,6 +20,7 @@
 #' simulatetrial(response.probs = c(0.4, 0.4),
 #'                ns = c(30, 60, 90, 120, 150),
 #'                max.ar = 0.75,
+#'                test.type = "Twoside",
 #'                rand.algo = "Urn",
 #'                max.deviation = 3,
 #'                model.inf = list(
@@ -48,7 +50,8 @@
 #'                Fixratio = FALSE,
 #'                Fixratiocontrol = NA,
 #'                BARmethod = "Thall",
-#'                Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1)
+#'                Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
+#'                Trippa.tuning.inf = list(a = 10, b = 0.75)
 #'                ),
 #'                trend.inf = list(
 #'                trend.type = "step",
@@ -59,6 +62,7 @@
 simulatetrial <- function(ii,
                            response.probs = c(0.4, 0.4),
                            ns = c(30, 60, 90, 120, 150),
+                           test.type = "Twoside",
                            max.ar = 0.75,
                            rand.algo = "Urn",
                            max.deviation = 3,
@@ -95,11 +99,15 @@ simulatetrial <- function(ii,
   BARmethod = Random.inf$BARmethod
   #List of information required for Thall's approach
   Thall.tuning.inf = Random.inf$Thall.tuning.inf
+  #List of information required for Trippa's approach
+  Trippa.tuning.inf = Random.inf$Trippa.tuning.inf
   #Identify whether the tuning parameter for Thall's approach is fixed or not
   tuningparameter = Thall.tuning.inf$tuningparameter
-  #Fixed tuning parameter for Thall's approach
+  #Fixed tuning parameter for Thall's approach if existing
   c = Thall.tuning.inf$c
-
+  #Fixed tuning parameter for Trippa's approach if existing
+  a = Trippa.tuning.inf$a
+  b = Trippa.tuning.inf$b
   #-Simulation setting-
   #Initialize Data
   initialised.par = Initializetrialparameter(response.probs, ns)
@@ -115,6 +123,12 @@ simulatetrial <- function(ii,
   y = initialised.par$y
   group_indicator = initialised.par$group_indicator
   post.prob.best.mat = initialised.par$post.prob.best.mat
+
+  if (test.type == "Twoside" & isFALSE(model.inf$Random.inf$Fixratio)){
+    warning("Adaptive randomisation aims to allocate to superior arms,
+            while two side test conclude both superiority and inferiority.
+            Therefore, these two approaches have conflicting purposes.")
+  }
 
   #-max.ar check
   if (1 - max.ar > 1/K){
@@ -262,23 +276,20 @@ simulatetrial <- function(ii,
         #Normalizing in case any value equals zero
         post.prob.best = post.prob.best + 1e-7
         post.prob.best = post.prob.best / sum(post.prob.best)
-        #----Justify if type I error was made for each arm----
-        # post.prob.btcontrol>cutoffeff[group]: Efficacy boundary is hit at this stage
-        # post.prob.btcontrol<cutoffful[group]: Fultility boundary is hit at this stage
-        Justify = post.prob.btcontrol > cutoffeff[group] |
-          post.prob.btcontrol < cutoffful[group]
-        #Identify which active arm should be dropped at current stage
-        treatmentdrop = treatmentindex[post.prob.btcontrol > cutoffeff[group] |
-                                         post.prob.btcontrol < cutoffful[group]]
-        stats3 = rep(NA, K - 1)
-        names(stats3) = seq(1, K - 1)
-        stats3[treatmentindex] = Justify
-        if (sum(Justify) > 0) {
-          armleft = armleft - sum(Justify)
-          #Debugged for K arm by Ziyan Wang on 12:00 26/07/2022 for three arm. Used to be treatmentindex = treatmentindex[-treatmentdrop]
-          #Debugged for K arm by Ziyan Wang on 18:58 26/07/2022 for more than 3 arm. Used to be treatmentindex = treatmentindex[!(treatmentindex==treatmentdrop)]
-          treatmentindex = treatmentindex[is.na(match(treatmentindex, treatmentdrop))]
-        }
+        # Drop both superior and inferior arm and make hypothesis testing
+        test_drop.inf = testing_and_armdropping(
+          K = K,
+          armleft = armleft,
+          post.prob.btcontrol = post.prob.btcontrol,
+          group = group,
+          cutoffeff = cutoffeff,
+          cutoffful = cutoffful,
+          treatmentindex = treatmentindex,
+          test.type = test.type
+        )
+        stats3 = test_drop.inf$stats3
+        armleft = test_drop.inf$armleft
+        treatmentindex = test_drop.inf$treatmentindex
       }
       else {
         nibb = n[c(1, treatmentindex + 1)]
@@ -297,20 +308,20 @@ simulatetrial <- function(ii,
         stats1 = rep(NA, K - 1)
         names(stats1) = seq(1, K - 1)
         stats1[treatmentindex] = post.prob.btcontrol
-        #----Justify if type I error was made for each arm (pseudo-K-arm)----
-        Justify = post.prob.btcontrol > cutoffeff[group] |
-          post.prob.btcontrol < cutoffful[group]
-        treatmentdrop = treatmentindex[post.prob.btcontrol > cutoffeff[group] |
-                                         post.prob.btcontrol < cutoffful[group]]
-        stats3 = rep(NA, K - 1)
-        names(stats3) = seq(1, K - 1)
-        stats3[treatmentindex] = Justify
-        if (sum(Justify) > 0) {
-          armleft = armleft - sum(Justify)
-          #Debugged for K arm by Ziyan Wang on 12:00 26/07/2022 for three arm. Used to be treatmentindex = treatmentindex[-treatmentdrop]
-          #Debugged for K arm by Ziyan Wang on 18:58 26/07/2022 for more than 3 arm. Used to be treatmentindex = treatmentindex[!(treatmentindex==treatmentdrop)]
-          treatmentindex = treatmentindex[is.na(match(treatmentindex, treatmentdrop))]
-        }
+        # Drop both superior and inferior arm and make hypothesis testing
+        test_drop.inf = testing_and_armdropping(
+          K = K,
+          armleft = armleft,
+          post.prob.btcontrol = post.prob.btcontrol,
+          group = group,
+          cutoffeff = cutoffeff,
+          cutoffful = cutoffful,
+          treatmentindex = treatmentindex,
+          test.type = test.type
+        )
+        stats3 = test_drop.inf$stats3
+        armleft = test_drop.inf$armleft
+        treatmentindex = test_drop.inf$treatmentindex
       }
       randomprob = ARmethod(
         Fixratio,
@@ -322,6 +333,8 @@ simulatetrial <- function(ii,
         n,
         tuningparameter,
         c,
+        a,
+        b,
         post.prob.best,
         max.ar,
         armleft,
@@ -401,23 +414,20 @@ simulatetrial <- function(ii,
         post.prob.best = post.prob.best + 1e-7
         post.prob.best = post.prob.best / sum(post.prob.best)
 
-        #----Justify if type I error was made for each treatment - control comparison----
-        # post.prob.btcontrol>cutoffeff[group]: Efficacy boundary is hit at this stage
-        # post.prob.btcontrol<cutoffful[group]: Fultility boundary is hit at this stage
-        Justify = post.prob.btcontrol > cutoffeff[group] |
-          post.prob.btcontrol < cutoffful[group]
-        #Identify which active arm should be dropped at current stage
-        treatmentdrop = treatmentindex[post.prob.btcontrol > cutoffeff[group] |
-                                         post.prob.btcontrol < cutoffful[group]]
-        stats3 = rep(NA, K - 1)
-        names(stats3) = seq(1, K - 1)
-        stats3[treatmentindex] = Justify
-        if (sum(Justify) > 0) {
-          armleft = armleft - sum(Justify)
-          #Debugged for K arm by Ziyan Wang on 12:00 26/07/2022 for three arm. Used to be treatmentindex = treatmentindex[-treatmentdrop]
-          #Debugged for K arm by Ziyan Wang on 18:58 26/07/2022 for more than 3 arm. Used to be treatmentindex = treatmentindex[!(treatmentindex==treatmentdrop)]
-          treatmentindex = treatmentindex[is.na(match(treatmentindex, treatmentdrop))]
-        }
+        # Drop both superior and inferior arm and make hypothesis testing
+        test_drop.inf = testing_and_armdropping(
+          K = K,
+          armleft = armleft,
+          post.prob.btcontrol = post.prob.btcontrol,
+          group = group,
+          cutoffeff = cutoffeff,
+          cutoffful = cutoffful,
+          treatmentindex = treatmentindex,
+          test.type = test.type
+        )
+        stats3 = test_drop.inf$stats3
+        armleft = test_drop.inf$armleft
+        treatmentindex = test_drop.inf$treatmentindex
       }
       else if (model.inf$tlr.inf$variable.inf == "Mixeffect.stan") {
         dataran = list(
@@ -479,23 +489,20 @@ simulatetrial <- function(ii,
         #Normalizing in case any value equals zero
         post.prob.best = post.prob.best + 1e-7
         post.prob.best = post.prob.best / sum(post.prob.best)
-        #----Justify if type I error was made for each arm----
-        # post.prob.btcontrol>cutoffeff[group]: Efficacy boundary is hit at this stage
-        # post.prob.btcontrol<cutoffful[group]: Fultility boundary is hit at this stage
-        Justify = post.prob.btcontrol > cutoffeff[group] |
-          post.prob.btcontrol < cutoffful[group]
-        #Identify which active arm should be dropped at current stage
-        treatmentdrop = treatmentindex[post.prob.btcontrol > cutoffeff[group] |
-                                         post.prob.btcontrol < cutoffful[group]]
-        stats3 = rep(NA, K - 1)
-        names(stats3) = seq(1, K - 1)
-        stats3[treatmentindex] = Justify
-        if (sum(Justify) > 0) {
-          armleft = armleft - sum(Justify)
-          #Debugged for K arm by Ziyan Wang on 12:00 26/07/2022 for three arm. Used to be treatmentindex = treatmentindex[-treatmentdrop]
-          #Debugged for K arm by Ziyan Wang on 18:58 26/07/2022 for more than 3 arm. Used to be treatmentindex = treatmentindex[!(treatmentindex==treatmentdrop)]
-          treatmentindex = treatmentindex[is.na(match(treatmentindex, treatmentdrop))]
-        }
+        # Drop both superior and inferior arm and make hypothesis testing
+        test_drop.inf = testing_and_armdropping(
+          K = K,
+          armleft = armleft,
+          post.prob.btcontrol = post.prob.btcontrol,
+          group = group,
+          cutoffeff = cutoffeff,
+          cutoffful = cutoffful,
+          treatmentindex = treatmentindex,
+          test.type = test.type
+        )
+        stats3 = test_drop.inf$stats3
+        armleft = test_drop.inf$armleft
+        treatmentindex = test_drop.inf$treatmentindex
       }
 
       #-Adjust the posterior randomisation ratio-
@@ -509,6 +516,8 @@ simulatetrial <- function(ii,
         n,
         tuningparameter,
         c,
+        a,
+        b,
         post.prob.best,
         max.ar,
         armleft,

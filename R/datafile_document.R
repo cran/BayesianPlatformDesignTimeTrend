@@ -93,8 +93,8 @@
 
 "OPC_Trial.simulation"
 
-#' @title A list of data from Gaussian process for cutoff screening.
-#' @description A list of data from Gaussian process for cutoff screening.
+#' @title A list of data from Gaussian process for symmetric cutoff screening.
+#' @description A list of data from Gaussian process for symmetric cutoff screening.
 #' @format A list with two element:
 #' \describe{
 #'   \item{\code{next.cutoff}}{The cutoff value for the next evaluation}
@@ -103,4 +103,17 @@
 #'   \item{\code{cutoff}}{A vector of cutoff data}
 #'}
 
-"optimdata"
+"optimdata_sym"
+
+
+#' @title A list of data from Gaussian process and trial simulation for asymmetric cutoff screening.
+#' @description A list of data from Gaussian process and trial simulation for asymmetric cutoff screening.
+#' @format A list with four element:
+#' \describe{
+#'   \item{\code{next.cutoff}}{The cutoff value for the next evaluation}
+#'   \item{\code{prediction}}{A list of values from Gaussian process model}
+#'   \item{\code{ESS}}{A two column twenty five rows matrix with the effective sample size for each cutoff pair under both null (first column) and alternative (second column) scenario}
+#'   \item{\code{testeddata}}{A data frame containing each tested cutoff pair (column two and three for efficacy and futility, respectively), their FWER under null (column one) and conjunctive power under alternative (column four)}
+#'}
+
+"optimdata_asy"

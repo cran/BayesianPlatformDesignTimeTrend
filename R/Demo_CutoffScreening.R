@@ -33,6 +33,7 @@ demo_Cutoffscreening = function(ntrials = 1000,
                                   max.ar = 0.75,
                                   rand.algo = "Urn",
                                   max.deviation = 3,
+                                  test.type = "Twoside",
                                   model.inf = list(
                                     model = "tlr",
                                     ibb.inf = list(
@@ -104,7 +105,7 @@ demo_Cutoffscreening = function(ntrials = 1000,
     )
 
     # perHtypeIerror=mean(perHtypeIerrorfunc(result))
-    FWER = FWER_disconjunctivepowerfunc(result)
+    FWER = conjuncativepower_or_FWER(result,input.info$response.probs,test.type = input.info$test.type)
     startgrid[j, 1] = FWER
   }
 
@@ -151,7 +152,7 @@ demo_Cutoffscreening = function(ntrials = 1000,
       Random.inf = input.info$Random.inf,
       trend.inf = input.info$trend.inf
     )
-    FWER = FWER_disconjunctivepowerfunc(restlr090five)
+    FWER = conjuncativepower_or_FWER(restlr090five, input.info$response.probs,test.type = input.info$test.type)
     extendgrid[cutoffindex, 1] = FWER
     extendgrid$cutoff2 <- extendgrid$cutoff ^ 2
     quadratic.model <-

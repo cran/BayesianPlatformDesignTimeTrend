@@ -1,0 +1,259 @@
+---
+title: "MAMS-CutoffScreening-GP-Asymmetric-tutorial"
+output: rmarkdown::html_vignette
+author: "Ziyan Wang"
+vignette: >
+  %\VignetteIndexEntry{MAMS-CutoffScreening-GP-Asymmetric-tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+ knitr::opts_chunk$set(
+   collapse = TRUE,
+   comment = "#>"
+ )
+```
+
+```{r setup}
+library(BayesianPlatformDesignTimeTrend)
+```
+## Four arm trial cutoff screening
+
+The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening_GP}} and MAMS-CutoffScreening-GP-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. 
+In this tutorial, the cutoff screening process for asymmetric boundary will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero, which means that there is no time trend effect in this example. The randomisation method used is the unfixed Thall's approach. The early stop boundary is the Asymmetric Pocock boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial. For asymmetric boundary screening, we can find a contour for FWER = 10\%. For each value on this contour, the (conjunctive, disconjunctive or marginal) power is optimized under the alternative scenario user specified. In this example, the alternative scenario is \pi_0 = \pi_3 = 0.4, \pi_1 = \pi_2 = 0.6. In this tutorial, we will recommend a cutoff value for each power definition. The contour plot will also be presented for interpretation.
+
+```{r,eval=FALSE}
+
+ntrials = 1000 # Number of trial replicates
+ns = seq(120, 600, 60) # Sequence of total number of accrued patients at each interim analysis
+null.reponse.prob = 0.4
+alt.response.prob = 0.6
+
+# We investigate the type I error rate for different time trend strength
+null.scenario = matrix(
+  c(
+    null.reponse.prob,
+    null.reponse.prob,
+    null.reponse.prob,
+    null.reponse.prob
+  ),
+  nrow = 1,
+  ncol = 4,
+  byrow = T
+)
+alt.scenario = matrix(
+  c(
+    null.reponse.prob,
+    alt.response.prob,
+    alt.response.prob,
+    null.reponse.prob
+  ),
+  nrow = 1,
+  ncol = 4,
+  byrow = T
+)
+model = "tlr" #logistic model
+max.ar = 0.85  #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+#------------Select the data generation randomisation methods-------
+rand.type = "Urn" # Urn design
+max.deviation = 3 # The recommended value for the tuning parameter in the Urn design
+
+# Require multiple cores for parallel running on HPC (Here is the number of cores i ask on Iridis 5 in University of Southampton)
+cl = 40 
+
+# Set the model we want to use and the time trend effect for each model used.
+# Here the main model will be used twice for two different strength of time trend c(0,0,0,0) and c(1,1,1,1) to investigate how time trend affect the evaluation metrics in BAR setting.
+# Then the main + stage_continuous model which is the treatment effect + stage effect model will be applied for strength equal c(1,1,1,1) to investigate how the main + stage effect model improve the evaluation metrics.
+reg.inf = "main"
+trend.effect = c(0,0,0,0)
+
+result = {
+  
+}
+OPC = {
+  
+}
+K = dim(null.scenario)[2]
+cutoffindex = 1
+trendindex = 1
+
+cutoff.information=demo_Cutoffscreening.GP (
+  ntrials = ntrials,
+  # Number of trial replicates
+  trial.fun = simulatetrial,
+  # Call the main function
+  power.type = "Conjunctive",
+  response.probs.alt = alt.scenario,
+  grid.inf = list(
+    start.length = 15,
+    grid.min = NULL,
+    grid.max = NULL,
+    confidence.level = 0.95,
+    grid.length = 101,
+    change.scale = FALSE,
+    noise = T,
+    errorrate = 0.1,
+    simulationerror = 0.01,
+    iter.max = 15,
+    plotornot = FALSE),
+  # Set up the cutoff grid for screening. The start grid has three elements. The extended grid has fifteen cutoff value under investigation
+  input.info = list(
+    response.probs = null.scenario[1,],
+    #The scenario vector in this round
+    ns = ns,
+    # Sequence of total number of accrued patients at each interim analysis
+    max.ar =  max.ar,
+    #limit the allocation ratio for the control group (1-max.ar < r_control < max.ar)
+    rand.type = rand.type,
+    # Which randomisation methods in data generation.
+    max.deviation = max.deviation,
+    # The recommended value for the tuning parameter in the Urn design
+    model.inf = list(
+      model = model,
+      #Use which model?
+      ibb.inf = list(
+        #independent beta-binomial model which can be used only for no time trend simulation
+        pi.star = 0.5,
+        # beta prior mean
+        pess = 2,
+        # beta prior effective sample size
+        betabinomialmodel = ibetabinomial.post # beta-binomial model for posterior estimation
+      ),
+      tlr.inf = list(
+        beta0_prior_mu = 0,
+        # Stan logistic model t prior location
+        beta1_prior_mu = 0,
+        # Stan logistic model t prior location
+        beta0_prior_sigma = 2.5,
+        # Stan logistic model t prior sigma
+        beta1_prior_sigma = 2.5,
+        # Stan logistic model t prior sigma
+        beta0_df = 7,
+        # Stan logistic model t prior degree of freedom
+        beta1_df = 7,
+        # Stan logistic model t prior degree of freedom
+        reg.inf =  reg.inf,
+        # The model we want to use
+        variable.inf = "Fixeffect" # Use fix effect logistic model
+      )
+    ),
+    Stop.type = "Early-Pocock",
+    # Use Pocock like early stopping boundary
+    Boundary.type = "Asymmetric",
+    # Use Symmetric boundary where cutoff value for efficacy boundary and futility boundary sum up to 1
+    Random.inf = list(
+      Fixratio = FALSE,
+      # Do not use fix ratio allocation
+      Fixratiocontrol = NA,
+      # Do not use fix ratio allocation
+      BARmethod = "Thall",
+      # Use Thall's Bayesian adaptive randomisation approach
+      Thall.tuning.inf = list(tuningparameter = "Unfixed",  fixvalue = 1) # Specified the tunning parameter value for fixed tuning parameter
+    ),
+    trend.inf = list(
+      trend.type = "linear",
+      # Linear time trend pattern
+      trend.effect = trend.effect,
+      # Stength of time trend effect
+      trend_add_or_multip = "mult" # Multiplicative time trend effect on response probability
+    )
+  ),
+  cl = 2
+)
+
+```
+
+Summary of the output data from cutoff screening example
+
+```{r}
+library(ggplot2)
+# Details of grid
+optimdata=optimdata_asy
+# Recommend cutoff at each screening round
+nextcutoff = optimdata$next.cutoff
+nextcutoff$FWER=0.05
+nextcutoff.predict = nextcutoff
+colnames(nextcutoff.predict)=c("eff","fut","FWER")
+prediction = optimdata$prediction
+point.tested=optimdata$testeddata[,2:3]
+tpIE=optimdata$testeddata[,1]
+pow=optimdata$testeddata[,4]
+point.tested=point.tested[1:sum(!is.na(tpIE)),]
+tpIE=tpIE[1:sum(!is.na(tpIE))]
+pow=pow[1:sum(!is.na(pow))]
+cleandata=data.frame(FWER=tpIE,pow=pow,point.tested)
+colnames(cleandata)[c(3,4)]=c("eff","fut")
+GP.res = optimdata
+xgrid.eff=optimdata$prediction$xgrid[,1]
+xgrid.fut=optimdata$prediction$xgrid[,2]
+grid.min=c(0.95,0)
+grid.max=c(1,0.05)
+
+library(reshape2)
+library(ggplot2)
+library(grDevices)
+library(RColorBrewer)
+library(directlabels)
+colormap=colorRampPalette(rev(brewer.pal(11,'Spectral')))(32)
+target_line=0.1
+
+df=data.frame(FWER=optimdata$prediction$yhat.t1E,eff=xgrid.eff,fut=xgrid.fut)
+Contour.tIE<-ggplot(df,aes(eff,fut,z=FWER))+
+  scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=FWER))+
+  geom_contour(breaks=c(target_line, seq(min(df$FWER),max(df$FWER),by=(max(df$FWER)-min(df$FWER))/10)),color="black")+
+  geom_contour(breaks=target_line,color="white",linewidth=1.1)+
+  labs(title="Mean type I error rate (FWER)", x="Cutoff value for efficacy",y="Cutoff value for futility")
+Contour.tIE=Contour.tIE+geom_point(data=cleandata,aes(eff,fut),color="black")+geom_point(data=nextcutoff.predict,aes(eff,fut),color="pink")
+
+# Extract the contour data
+contour_data_tIE <- ggplot_build(Contour.tIE)$data[[2]]
+# Record the contour that has FWER equal to the target
+contour_data_tIE_subset <- contour_data_tIE[contour_data_tIE$level == target_line, ]
+# Order and split the data to ensure the plot is drawn correctly
+contour_data_tIE_subset=contour_data_tIE_subset[order(contour_data_tIE_subset$piece,contour_data_tIE_subset$x),]
+contour_data_tIE_subset_1=contour_data_tIE_subset[contour_data_tIE_subset$piece==1,]
+contour_data_tIE_subset_2=contour_data_tIE_subset[contour_data_tIE_subset$piece==2,]
+# To make sure the data frame is not empty
+if (nrow(contour_data_tIE_subset_1) == 0){
+  contour_data_tIE_subset_1[1,]=(rep(NA,dim(contour_data_tIE_subset_1)[[2]]))
+} else if (nrow(contour_data_tIE_subset_2) == 0){
+  contour_data_tIE_subset_2[1,]=(rep(NA,dim(contour_data_tIE_subset_2)[[2]]))
+}
+
+
+df=data.frame(sd=optimdata$prediction$sd.t1E,eff=xgrid.eff,fut=xgrid.fut)
+Contour.sd<-ggplot(df,aes(eff,fut,z=sd))+
+  scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=sd))+
+  geom_contour(breaks=seq(min(df$sd),max(df$sd),by=(max(df$sd)-min(df$sd))/10),color="black")+labs(title="sd of contour", x="Cutoff value for efficacy",y="Cutoff value for futility")
+Contour.sd=Contour.sd+
+  geom_path(data = contour_data_tIE_subset_1, aes(x,y,z=NA),color="white",linewidth=1.1)+geom_path(data = contour_data_tIE_subset_2, aes(x,y,z=NA),color="white",linewidth=1.1)+geom_point(data=cleandata,aes(eff,fut,z=NA),color="black")+geom_point(data=nextcutoff.predict,aes(eff,fut,z=NA),color="pink")
+
+df=data.frame(Power=optimdata$prediction$yhat.pow,eff=xgrid.eff,fut=xgrid.fut)
+Contour.pow<-ggplot(df,aes(eff,fut,z=Power))+
+  scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=Power))+
+  geom_contour(breaks=seq(min(df$Power),max(df$Power),by=(max(df$Power)-min(df$Power))/10),color="black")+labs(title="Mean power", x="Cutoff value for efficacy",y="Cutoff value for futility")
+Contour.pow=Contour.pow+
+  geom_path(data = contour_data_tIE_subset_1, aes(x,y,z=NA),color="white",linewidth=1.1)+geom_path(data = contour_data_tIE_subset_2, aes(x,y,z=NA),color="white",linewidth=1.1)+
+  geom_point(data=cleandata,aes(eff,fut,z=NA),color="black")+geom_point(data=nextcutoff.predict,aes(eff,fut,z=NA),color="pink")
+
+df=data.frame(NullESS=optimdata$prediction$yhat.ESS.null,eff=xgrid.eff,fut=xgrid.fut)
+Contour.nullESS<-ggplot(df,aes(eff,fut,z=NullESS))+
+  scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=NullESS))+
+  geom_contour(breaks=seq(min(df$NullESS),max(df$NullESS),by=(max(df$NullESS)-min(df$NullESS))/10),color="black")+labs(title="Mean ESS under null", x="Cutoff value for efficacy",y="Cutoff value for futility")
+Contour.nullESS=Contour.nullESS+
+  geom_path(data = contour_data_tIE_subset_1, aes(x,y,z=NA),color="white",linewidth=1.1)+geom_path(data = contour_data_tIE_subset_2, aes(x,y,z=NA),color="white",linewidth=1.1)+geom_point(data=cleandata,aes(eff,fut,z=NA),color="black")+geom_point(data=nextcutoff.predict,aes(eff,fut,z=NA),color="pink")
+
+df=data.frame(AltESS=optimdata$prediction$yhat.ESS.alt,eff=xgrid.eff,fut=xgrid.fut)
+Contour.altESS<-ggplot(df,aes(eff,fut,z=AltESS))+
+  scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=AltESS))+
+  geom_contour(breaks=seq(min(df$AltESS),max(df$AltESS),by=(max(df$AltESS)-min(df$AltESS))/10),color="black")+labs(title="Mean ESS under alternative", x="Cutoff value for efficacy",y="Cutoff value for futility")
+Contour.altESS=Contour.altESS+
+  geom_path(data = contour_data_tIE_subset_1, aes(x,y,z=NA),color="white",linewidth=1.1)+geom_path(data = contour_data_tIE_subset_2, aes(x,y,z=NA),color="white",linewidth=1.1)+
+  geom_point(data=cleandata,aes(eff,fut,z=NA),color="black")+geom_point(data=nextcutoff.predict,aes(eff,fut,z=NA),color="pink")
+```
+```{r,fig.align='center',fig.height=9,fig.width=7,warning=FALSE}
+library(ggpubr)
+ggarrange(Contour.tIE,Contour.pow,Contour.nullESS,Contour.altESS,Contour.sd,ncol = 2,nrow=3)
+```
+Red indicates higher value, and purple indicates lower value. The black solid point is the tested cutoff pairs. The white line is the contour for FWER equal to 0.1. The pink point is the next cutoff recommended where power is optimised. As we can see, the pink point control the FWER to 0.1, maximise the power, minimise the Effective sample size (ESS) under the alternative scenario. The ESS under null has a close contour direction to FWER plot which means that same FWER leads to similar ESS under the trial setting (maximum acceptable sample size is picked before simulation due to budget).

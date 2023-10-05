@@ -1,9 +1,9 @@
 ---
-title: "MAMS-CutoffScreening-GP-tutorial"
+title: "MAMS-CutoffScreening-GP-Symmetric-tutorial"
 output: rmarkdown::html_vignette
 author: "Ziyan Wang"
 vignette: >
-  %\VignetteIndexEntry{MAMS-CutoffScreening-GP-tutorial}
+  %\VignetteIndexEntry{MAMS-CutoffScreening-GP-Symmetric-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -21,7 +21,7 @@ library(BayesianPlatformDesignTimeTrend)
 ## Four arm trial cutoff screening
 
 The 'BayesianPlatformDesignTimeTrend' package simulation process requires stopping boundary cutoff screening first (details refers to demo \code{\link{demo_Cutoffscreening_GP}} and MAMS-CutoffScreening-GP-tutorial). After the cutoff screening process, we need to record the cutoff value of both efficacy and futility boundary for use in the trial simulation process. The data of each trail replicates will be created sequentially during the simulation. 
-In this tutorial, the cutoff screening process will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall's approach. The early stop boundary is the symmetric OBF boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
+In this tutorial, the cutoff screening process for symmertic boundary will be presented. The example is a four-arm MAMS trial with one control and three treatment arms. The control arm will not be stopped during the trial. The time trend pattern are set to be 'linear'. The way of time trend impacting the beginning response probability is set to be 'mult' (multiplicative). The time trend strength is set to be zero. The randomisation method used is the unfixed Thall's approach. The early stop boundary is the symmetric OBF boundary. The model used in this example are fixed effect model (the model with only treatment effect and the model with both treatment effect and discrete stage effect). The evaluation metrics are error rate, mean treatment effect bias, rooted MSE, mean number of patients allocated to each arm and mean total number of patients in the trial.
 
 ```{r,eval=FALSE}
 
@@ -78,8 +78,8 @@ cutoff.information=demo_Cutoffscreening.GP (
   # Call the main function
   grid.inf = list(
     start.length = 10,
-    grid.min,
-    grid.max,
+    grid.min = NULL,
+    grid.max = NULL,
     confidence.level = 0.95,
     grid.length = 5000,
     change.scale = FALSE,
@@ -160,7 +160,7 @@ Summary of the output data from cutoff screening example
 ```{r}
 library(ggplot2)
 # Details of grid
-optimdata=optimdata
+optimdata=optimdata_sym
 # Recommend cutoff at each screening round
 nextcutoff = optimdata$next.cutoff
 prediction = optimdata$prediction
@@ -169,10 +169,10 @@ tpIE=optimdata$tpIE
 cutoff=cutoff[1:sum(!is.na(tpIE))]
 tpIE=tpIE[1:sum(!is.na(tpIE))]
 GP.res = optimdata
-prediction = data.frame(yhat = GP.res$prediction$yhat,
-                        sd = matrix(GP.res$prediction$sd,ncol=1),
-                        qup = GP.res$prediction$qup,
-                        qdown = GP.res$prediction$qdown,
+prediction = data.frame(yhat = GP.res$prediction$yhat.t1E,
+                        sd = matrix(GP.res$prediction$sd.t1E,ncol=1),
+                        qup = GP.res$prediction$qup.t1E,
+                        qdown = GP.res$prediction$qdown.t1E,
                         xgrid = GP.res$prediction$xgrid)
 GPplot=ggplot(data = prediction) +
         geom_ribbon(aes(x = xgrid, ymin = qdown, ymax = qup),col="#f8766d", alpha = 0.5,linetype = 2) +

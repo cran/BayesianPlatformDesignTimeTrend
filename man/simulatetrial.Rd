@@ -8,6 +8,7 @@ simulatetrial(
   ii,
   response.probs = c(0.4, 0.4),
   ns = c(30, 60, 90, 120, 150),
+  test.type = "Twoside",
   max.ar = 0.75,
   rand.algo = "Urn",
   max.deviation = 3,
@@ -26,6 +27,8 @@ simulatetrial(
 \item{response.probs}{A vector of true response probability for each arm. Default response.probs = c(0.4, 0.4).}
 
 \item{ns}{A vector of accumulated number of patient at each stage. Default is ns = c(30, 60, 90, 120, 150).}
+
+\item{test.type}{A indicator of whether to use one side test or two side test for each treatment-control comparison.}
 
 \item{max.ar}{The upper boundary for randomisation ratio for each arm. Default is 0.75 for a two arm trial. The minimum value depends on K where 1 - max.ar <= 1/K}
 
@@ -52,6 +55,7 @@ set.seed(1)
 simulatetrial(response.probs = c(0.4, 0.4),
                ns = c(30, 60, 90, 120, 150),
                max.ar = 0.75,
+               test.type = "Twoside",
                rand.algo = "Urn",
                max.deviation = 3,
                model.inf = list(
@@ -81,7 +85,8 @@ simulatetrial(response.probs = c(0.4, 0.4),
                Fixratio = FALSE,
                Fixratiocontrol = NA,
                BARmethod = "Thall",
-               Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1)
+               Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
+               Trippa.tuning.inf = list(a = 10, b = 0.75)
                ),
                trend.inf = list(
                trend.type = "step",

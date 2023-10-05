@@ -8,15 +8,16 @@ Trial.simulation(
   ntrials = 5000,
   trial.fun = simulatetrial,
   input.info = list(response.probs = c(0.4, 0.4), ns = c(30, 60, 90, 120, 150), max.ar =
-    0.75, rand.algo = "Urn", max.deviation = 3, model.inf = list(model = "tlr", ibb.inf =
-    list(pi.star = 0.5, pess = 2, betabinomialmodel = ibetabinomial.post), tlr.inf =
-    list(beta0_prior_mu = 0, beta1_prior_mu = 0, beta0_prior_sigma = 2.5,
-    beta1_prior_sigma = 2.5, beta0_df = 7, beta1_df = 7, reg.inf = "main", variable.inf =
-    "Fixeffect")), Stopbound.inf = Stopboundinf(Stop.type = "Early-Pocock", Boundary.type
-    = "Symmetric", cutoff = c(0.99, 
-     0.01)), Random.inf = list(Fixratio = FALSE,
-    Fixratiocontrol = NA, BARmethod = "Thall", Thall.tuning.inf = list(tuningparameter =
-    "Fixed", fixvalue = 1)), trend.inf = list(trend.type = "step", trend.effect = c(0,
+    0.75, test.type = "Twoside", rand.algo = "Urn", max.deviation = 3, model.inf =
+    list(model = "tlr", ibb.inf = list(pi.star = 0.5, pess = 2, betabinomialmodel =
+    ibetabinomial.post), tlr.inf = list(beta0_prior_mu = 0, beta1_prior_mu = 0,
+    beta0_prior_sigma = 2.5, beta1_prior_sigma = 2.5, beta0_df = 7, beta1_df = 7, reg.inf
+    = "main", variable.inf = "Fixeffect")), Stopbound.inf = Stopboundinf(Stop.type =
+    "Early-Pocock", Boundary.type = "Symmetric", 
+     cutoff = c(0.99, 0.01)),
+    Random.inf = list(Fixratio = FALSE, Fixratiocontrol = NA, BARmethod = "Thall",
+    Thall.tuning.inf = list(tuningparameter = "Fixed", fixvalue = 1), Trippa.tuning.inf =
+    list(a = 10, b = 0.75)), trend.inf = list(trend.type = "step", trend.effect = c(0,
     0), trend_add_or_multip = "mult")),
   cl = 2
 )

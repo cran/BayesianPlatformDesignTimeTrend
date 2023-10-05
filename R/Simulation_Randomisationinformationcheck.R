@@ -14,14 +14,16 @@
 #' Fixratio = FALSE,
 #' Fixratiocontrol = NA,
 #' BARmethod = "Thall",
-#' Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1)
+#' Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
+#' Trippa.tuning.inf = list(a = NA, b = NA)
 #' ))
 #' @author Ziyan Wang
 Randomisation.inf = function(Random.inf = list(
   Fixratio = FALSE,
   Fixratiocontrol = NA,
   BARmethod = "Thall",
-  Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1)
+  Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
+  Trippa.tuning.inf = list(a = 10, b = 0.75)
 )) {
   Fixratio = Random.inf$Fixratio
   if (Fixratio == T) {
@@ -39,7 +41,8 @@ Randomisation.inf = function(Random.inf = list(
         Fixratio = Fixratio,
         Fixratiocontrol = Fixratiocontrol,
         BARmethod = NA,
-        Thall.tuning.inf = list(tuningparameter = NA,  c = NA)
+        Thall.tuning.inf = list(tuningparameter = NA,  c = NA),
+        Trippa.tuning.inf = list(a = NA, b = NA)
       )
     )
   }
@@ -76,9 +79,12 @@ Randomisation.inf = function(Random.inf = list(
     }
     else{
       BARmethod = "Trippa"
+      a = Random.inf$Trippa.tuning.inf$a
+      b = Random.inf$Trippa.tuning.inf$b
       return(
         list(
           BARmethod = BARmethod,
+          Trippa.tuning.inf = list(a = a, b = b),
           Thall.tuning.inf = list(tuningparameter = NA,  c = NA),
           Fixratio = Fixratio,
           Fixratiocontrol = NA
