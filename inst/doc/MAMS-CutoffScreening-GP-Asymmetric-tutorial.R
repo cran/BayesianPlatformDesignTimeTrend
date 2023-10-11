@@ -171,11 +171,8 @@ xgrid.fut=optimdata$prediction$xgrid[,2]
 grid.min=c(0.95,0)
 grid.max=c(1,0.05)
 
-library(reshape2)
-library(ggplot2)
 library(grDevices)
 library(RColorBrewer)
-library(directlabels)
 colormap=colorRampPalette(rev(brewer.pal(11,'Spectral')))(32)
 target_line=0.1
 

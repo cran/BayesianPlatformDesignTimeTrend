@@ -62,10 +62,6 @@ disconjunctivepowerfunc = function(res) {
 #' @examples
 #' \dontrun{conjuncativepower_or_FWER(res)}
 conjuncativepower_or_FWER=function(res,scenario,test.type){
-  K=mean(sapply(res,function(x){
-    K=sum(stringr::str_detect(colnames(x),"H"))+1
-    return(K)
-  }))
   hypres=mean(sapply(res,function(x){
     stage=dim(x)[1]
     resname=colnames(x)
@@ -111,9 +107,11 @@ conjuncativepower_or_FWER=function(res,scenario,test.type){
     # else{
     #   Stop("Input test.type is invalid.")
     # }
-    #Indentify which hypothesis is rejected
-    reject=which(matrix(x[,(K-1+2*K+1):(K-1+2*K+K-1)] %in% 1,ncol=K-1),1)[,2]
-    drop.at=which(matrix(x[,(K-1+2*K+1):(K-1+2*K+K-1)] %in% 1,ncol=K-1),1)[,1]
+    #Identify which hypothesis is rejected
+    reject = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
+                            K - 1), arr.ind = TRUE)[,2]
+    drop.at = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
+                             K - 1), arr.ind = TRUE)[, 1]
     drop.at.all=rep(stage,K-1)
     drop.at.all[reject]=drop.at
     treatmentindex=seq(1,K-1)
@@ -164,8 +162,8 @@ conjuncativepower_or_FWER=function(res,scenario,test.type){
 #' @examples
 #' \dontrun{Meanfunc(res)}
 Meanfunc = function(res) {
-  K = mean(sapply(res, function(x) {
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
+  K=mean(sapply(res,function(x){
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
   meaneffect = colMeans(matrix(t(sapply(res, function(x) {
@@ -214,8 +212,8 @@ Meanfunc = function(res) {
 #' @examples
 #' \dontrun{varfunc(res)}
 varfunc = function(res) {
-  K = mean(sapply(res, function(x) {
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
+  K=mean(sapply(res,function(x){
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
   meaneffect = matrixStats::colVars(matrix(t(sapply(res, function(x) {
@@ -265,8 +263,8 @@ varfunc = function(res) {
 #' @examples
 #' \dontrun{Nfunc(res)}
 Nfunc = function(res) {
-  K = mean(sapply(res, function(x) {
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
+  K=mean(sapply(res,function(x){
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
   Nmean = colMeans(matrix(t(sapply(res, function(x) {
@@ -315,8 +313,8 @@ Nfunc = function(res) {
 #' @examples
 #' \dontrun{Sperarmfunc(res)}
 Sperarmfunc = function(res) {
-  K = mean(sapply(res, function(x) {
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
+  K=mean(sapply(res,function(x){
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
   Smean = colMeans(matrix(t(sapply(res, function(x) {

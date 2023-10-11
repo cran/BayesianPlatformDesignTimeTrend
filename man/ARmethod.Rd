@@ -6,7 +6,6 @@
 \title{ARmethod}
 \usage{
 ARmethod(
-  Fixratio,
   BARmethod,
   group,
   stats,
@@ -24,8 +23,6 @@ ARmethod(
 )
 }
 \arguments{
-\item{Fixratio}{A indicator TRUE/FALSE}
-
 \item{BARmethod}{The indicator of which adaptive randomisation method is used}
 
 \item{group}{The current stage}
@@ -63,7 +60,7 @@ Currently Thall's approach and Trippa's approach are used.
 Double biased coin and other method will be added in the next version.
 }
 \examples{
-ARmethod(Fixratio = FALSE,
+ARmethod(
 BARmethod = "Thall",
 group = 1,
 stats = matrix(rep(NA, 40), ncol = 8, nrow = 5),
@@ -77,7 +74,7 @@ max.ar = 0.75,
 armleft = 2,
 treatmentindex = 1)
 
-ARmethod(Fixratio = FALSE,
+ARmethod(
 BARmethod = "Trippa",
 group = 1,
 stats = matrix(rep(NA, 40), ncol = 8, nrow = 5),

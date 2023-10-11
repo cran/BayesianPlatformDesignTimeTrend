@@ -2,7 +2,6 @@
 #' @description This function adjusts the posterior randomisation probability for each arm using many approaches.
 #'     Currently Thall's approach and Trippa's approach are used.
 #'     Double biased coin and other method will be added in the next version.
-#' @param Fixratio A indicator TRUE/FALSE
 #' @param BARmethod The indicator of which adaptive randomisation method is used
 #' @param group The current stage
 #' @param stats The output matrix
@@ -23,7 +22,7 @@
 #' @export
 #'
 #' @examples
-#' ARmethod(Fixratio = FALSE,
+#' ARmethod(
 #' BARmethod = "Thall",
 #' group = 1,
 #' stats = matrix(rep(NA, 40), ncol = 8, nrow = 5),
@@ -37,7 +36,7 @@
 #' armleft = 2,
 #' treatmentindex = 1)
 #'
-#' ARmethod(Fixratio = FALSE,
+#' ARmethod(
 #' BARmethod = "Trippa",
 #' group = 1,
 #' stats = matrix(rep(NA, 40), ncol = 8, nrow = 5),
@@ -57,8 +56,7 @@
 #'     A simulation study of outcome adaptive randomization in multi-arm clinical trials. Wathen, J. Kyle, and Peter F. Thall. Clinical Trials 14, no. 5 (2017): 432-440.
 #'
 #' @author Ziyan Wang
-ARmethod = function(Fixratio,
-                    BARmethod,
+ARmethod = function(BARmethod,
                     group,
                     stats,
                     post.prob.btcontrol,
@@ -73,15 +71,13 @@ ARmethod = function(Fixratio,
                     armleft,
                     treatmentindex) {
   # Validate inputs
-  if (!is.logical(Fixratio)) stop("Error: Fixratio should be a logical value (TRUE/FALSE)")
   if (!is.character(BARmethod)) stop("Error: BARmethod should be a character value")
   if (!is.numeric(group) || group <= 0) stop("Error: group should be a positive numeric value")
-  if (BARmethod == "Thall" & (!is.numeric(max.ar) || max.ar <= 0 || max.ar >= 1)) stop("max.ar should be a numeric value between 0 and 1 for Thall's approach")
-  if (BARmethod == "Trippa" & (!is.numeric(a) || !is.numeric(b))) stop("hyperparameters a and b should be a numeric value for Trippa's approach")
   if (K < 2) stop("Error: K should be an integer value greater than or equal to 2")
 
   #---------------------Trippa's approach---------------------
-  if (Fixratio == F & BARmethod == "Trippa") {
+  if (BARmethod == "Trippa") {
+    if ((!is.numeric(a) || !is.numeric(b))) stop("hyperparameters a and b should be a numeric value for Trippa's approach")
     ##Tuning the paprameter using method mentioned in Trippa's paper (2014)
     gamma_stage = a * ((group / dim(stats)[1])) ^ b
     eta_stage = 0.25 * (group / dim(stats)[1])
@@ -107,7 +103,8 @@ ARmethod = function(Fixratio,
   }
 
   #---------------------Thall's approach---------------------
-  else if (Fixratio == F & BARmethod == "Thall") {
+  else if (BARmethod == "Thall") {
+    if ((!is.numeric(max.ar) || max.ar <= 0 || max.ar >= 1)) stop("max.ar should be a numeric value between 0 and 1 for Thall's approach")
     ##Tuning parameter c for Thall's approach
 
     if (tuningparameter == "Unfixed") {
@@ -149,7 +146,7 @@ ARmethod = function(Fixratio,
     }
 
   }
-  else {
+  else{
     stop("Error: Please check the input of Fixratio and BARmethod")
   }
   return(randomprob)

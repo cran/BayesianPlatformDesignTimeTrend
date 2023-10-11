@@ -1,3 +1,7 @@
+# Oct 07, 2023, BayesianPlatformDesignTimeTrend version 1.2.1
+## Major changes
+- I fixed the error reported by cran.
+
 # Sept 30, 2023, BayesianPlatformDesignTimeTrend version 1.2.0
 ## Summary of changes
 - This release corrects the boundary construction formula of OBF boundary; 

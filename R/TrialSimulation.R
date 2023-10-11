@@ -51,11 +51,11 @@ Trial.simulation = function(ntrials = 5000,
                                 cutoff = c(0.99, 0.01)
                               ),
                               Random.inf = list(
-                                Fixratio = FALSE,
-                                Fixratiocontrol = NA,
-                                BARmethod = "Thall",
-                                Thall.tuning.inf = list(tuningparameter = "Fixed",  fixvalue = 1),
-                                Trippa.tuning.inf = list(a = 10, b = 0.75)
+                                Fixratio = TRUE,
+                                Fixratiocontrol = 1,
+                                BARmethod = NA,
+                                Thall.tuning.inf = NA,
+                                Trippa.tuning.inf = NA
                               ),
                               trend.inf = list(
                                 trend.type = "step",

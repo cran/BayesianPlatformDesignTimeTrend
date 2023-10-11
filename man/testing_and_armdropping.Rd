@@ -2,7 +2,7 @@
 % Please edit documentation in R/Simulation_Hypothesistesting_and_armdropping.R
 \name{testing_and_armdropping}
 \alias{testing_and_armdropping}
-\title{Title}
+\title{testing_and_armdropping}
 \usage{
 testing_and_armdropping(
   K,
@@ -40,7 +40,8 @@ treatmentindex: the index vector of active arm after this interim analysis;
 stats3: the vector of conclusion on whether null hypothesis is rejected
 }
 \description{
-Title
+This function makes a decision on whether any active arm should be dropped based on posterior probability and
+return the vector of decision on each arm, the vector of active arms index and the number of arms left for further study.
 }
 \examples{
 testing_and_armdropping(

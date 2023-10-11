@@ -46,6 +46,23 @@
 #' ns = c(30, 60, 90, 120, 150),
 #' Fixratiocontrol = NA)
 #'
+#' AdaptiveRandomisation(
+#' Fixratio = TRUE,
+#' rand.algo = "Urn",
+#' K = 4,
+#' n.new = 30,
+#' randomprob = NA,
+#' treatmentindex = c(1,3),
+#' groupwise.response.probs = matrix(rep(c(0.4, 0.4,0.4, 0.4), 5), byrow = TRUE, ncol = 4, nrow = 5),
+#' group = 1,
+#' armleft = 3,
+#' max.deviation = 3,
+#' trend_add_or_multip = "mult",
+#' trend.function = function(ns, group, i, trend.effect) {delta = 0; return(delta)},
+#' trend.effect = c(0, 0),
+#' ns = c(30, 60, 90, 120, 150),
+#' Fixratiocontrol = 1)
+#'
 #' @references Mass weighted urn design—a new randomization algorithm for unequal allocations. Zhao, Wenle. Contemporary clinical trials 43 (2015): 209-216.
 #' @author Ziyan Wang
 AdaptiveRandomisation = function(Fixratio,

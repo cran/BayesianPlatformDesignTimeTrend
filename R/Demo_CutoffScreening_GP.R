@@ -31,8 +31,10 @@
 #' @importFrom rstan rstan_options
 #' @importFrom RcppParallel RcppParallelLibs CxxFlags
 #' @importFrom graphics lines
-#' @importFrom grDevices heat.colors
+#' @importFrom grDevices colorRampPalette
 #' @importFrom graphics image par points
+#' @importFrom ggpubr ggarrange
+#' @importFrom RColorBrewer brewer.pal
 #' @import BiocManager
 #' @export
 #'
@@ -545,8 +547,17 @@ demo_Cutoffscreening.GP = function(ntrials = 1000,
       prediction = data.frame(
         yhat.t1E = GP.res$prediction$yhat.t1E,
         yhat.pow = GP.res$prediction$yhat.pow,
+        yhat.ESS.null = GP.res$prediction$yhat.ESS.null,
+        yhat.ESS.alt = GP.res$prediction$yhat.ESS.alt,
         sd.t1E = GP.res$prediction$sd.t1E,
         sd.pow = GP.res$prediction$sd.pow,
+        sd.ESS.null = GP.res$prediction$sd.ESS.null,
+        sd.ESS.alt = GP.res$prediction$sd.ESS.alt,
+        qup.ESS.null = GP.res$prediction$qup.ESS.null,
+        qup.ESS.alt = GP.res$prediction$qup.ESS.alt,
+        qdown.ESS.null = GP.res$prediction$qdown.ESS.null,
+        qdown.ESS.alt = GP.res$prediction$qdown.ESS.alt,
+        potentialcutoff = GP.res$prediction$potentialcutoff,
         qup.t1E = GP.res$prediction$qup.t1E,
         qdown.t1E = GP.res$prediction$qdown.t1E,
         qup.pow = GP.res$prediction$qup.pow,
@@ -558,81 +569,84 @@ demo_Cutoffscreening.GP = function(ntrials = 1000,
       # Plot or not
       if (isTRUE(grid.inf$plotornot)) {
         prediction=GP.res$prediction
-        cols = heat.colors(128)
-        nextcutoff = GP.res$next.cutoff
-        # Plot for predict type I error and standard deviation
-        point.tested = cbind(dnew$cutoff.eff,dnew$cutoff.fut)
-        par(mfrow=c(4,2))
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              matrix(prediction$yhat.t1E, ncol=sqrt(dim(prediction$xgrid)[1])),
-        main="Mean type I error rate (FWER)", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
+        colormap=colorRampPalette(rev(brewer.pal(11,'Spectral')))(32)
+        target_line=grid.inf$errorrate
+        xgrid.eff=prediction$xgrid[,1]
+        xgrid.fut=prediction$xgrid[,2]
+        nextcutoff.predict = nextcutoff
+        colnames(nextcutoff.predict)=c("eff","fut","FWER")
+        cleandata = dnew
+        colnames(cleandata)=c("tpIE","eff","fut","pow")
+        df=data.frame(FWER=prediction$yhat.t1E,eff=xgrid.eff,fut=xgrid.fut)
+        Contour.tIE<-ggplot(df,aes(x=df$eff,y=df$fut,z=FWER))+
+          scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=FWER))+
+          geom_contour(breaks=c(target_line, seq(min(df$FWER),max(df$FWER),by=(max(df$FWER)-min(df$FWER))/10)),color="black")+
+          geom_contour(breaks=target_line,color="white",linewidth=1.1)+
+          labs(title="Mean type I error rate (FWER)", x="Cutoff value for efficacy",y="Cutoff value for futility")
+        Contour.tIE=Contour.tIE+geom_point(data=cleandata,aes(x=cleandata$eff,y=cleandata$fut),color="black")+
+          geom_point(data=nextcutoff.predict,aes(x=nextcutoff.predict$eff,y=nextcutoff.predict$fut),color="pink")
 
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    matrix(prediction$sd.t1E, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="sd of type I error rate (FWER)", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
+        # Extract the contour data
+        contour_data_tIE <- ggplot_build(Contour.tIE)$data[[2]]
+        # Record the contour that has FWER equal to the target
+        contour_data_tIE_subset <- contour_data_tIE[contour_data_tIE$level == target_line, ]
+        # Order and split the data to ensure the plot is drawn correctly
+        contour_data_tIE_subset=contour_data_tIE_subset[order(contour_data_tIE_subset$piece,contour_data_tIE_subset$x),]
+        contour_data_tIE_subset_1=contour_data_tIE_subset[contour_data_tIE_subset$piece==1,]
+        contour_data_tIE_subset_2=contour_data_tIE_subset[contour_data_tIE_subset$piece==2,]
+        # To make sure the data frame is not empty
+        if (nrow(contour_data_tIE_subset_1) == 0){
+          contour_data_tIE_subset_1[1,]=(rep(NA,dim(contour_data_tIE_subset_1)[[2]]))
+        } else if (nrow(contour_data_tIE_subset_2) == 0){
+          contour_data_tIE_subset_2[1,]=(rep(NA,dim(contour_data_tIE_subset_2)[[2]]))
+        }
 
-        # Plot for predict power and standard deviation
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    matrix(prediction$yhat.pow, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="Mean power", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
 
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              matrix(prediction$sd.pow, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="sd of power", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
+        df=data.frame(precision=prediction$sd.t1E,eff=xgrid.eff,fut=xgrid.fut)
+        Contour.sd<-ggplot(df,aes(x=df$eff,y=df$fut,z=df$precision))+
+          scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=df$precision))+
+          geom_contour(breaks=seq(min(df$precision),max(df$precision),by=(max(df$precision)-min(df$precision))/10),color="black")+labs(title="sd of each contour plot", x="Cutoff value for efficacy",y="Cutoff value for futility")
+        Contour.sd=Contour.sd+
+          geom_path(data = contour_data_tIE_subset_1,
+                    aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_path(data = contour_data_tIE_subset_2, aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_point(data=cleandata,aes(cleandata$eff,cleandata$fut,z=NA),color="black")+
+          geom_point(data=nextcutoff.predict,aes(x=nextcutoff.predict$eff,y=nextcutoff.predict$fut,z=NA),color="pink")
 
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              matrix(prediction$yhat.ESS.null, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="Mean Effective sample size (ESS) under null", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-              matrix(prediction$sd.ESS.null, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="sd of Effective sample size (ESS) under null", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
+        df=data.frame(Power=prediction$yhat.pow,eff=xgrid.eff,fut=xgrid.fut)
+        Contour.pow<-ggplot(df,aes(x=df$eff,y=df$fut,z=df$Power))+
+          scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=df$Power))+
+          geom_contour(breaks=seq(min(df$Power),max(df$Power),by=(max(df$Power)-min(df$Power))/10),color="black")+labs(title="Mean power", x="Cutoff value for efficacy",y="Cutoff value for futility")
+        Contour.pow=Contour.pow+
+          geom_path(data = contour_data_tIE_subset_1,
+                    aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_path(data = contour_data_tIE_subset_2, aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_point(data=cleandata,aes(cleandata$eff,cleandata$fut,z=NA),color="black")+
+          geom_point(data=nextcutoff.predict,aes(x=nextcutoff.predict$eff,y=nextcutoff.predict$fut,z=NA),color="pink")
 
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    matrix(prediction$yhat.ESS.alt, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="Mean Effective sample size (ESS) under alternative", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
-        image(seq(grideff.min,grideff.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    seq(gridfut.min,gridfut.max,length.out=sqrt(dim(prediction$xgrid)[1])),
-                    matrix(prediction$sd.ESS.alt, ncol=sqrt(dim(prediction$xgrid)[1])),
-              main="sd of Effective sample size (ESS) under alternative", xlab="Cutoff value for efficacy",
-              ylab="Cutoff value for futility", col=cols)
-        points(point.tested)
-        points(prediction$potentialcutoff,col="blue",pch=19)
-        points(nextcutoff,col="green",pch=19)
+        df=data.frame(NullESS=prediction$yhat.ESS.null,eff=xgrid.eff,fut=xgrid.fut)
+        Contour.nullESS<-ggplot(df,aes(x=df$eff,y=df$fut,z=df$NullESS))+
+          scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=df$NullESS))+
+          geom_contour(breaks=seq(min(df$NullESS),max(df$NullESS),by=(max(df$NullESS)-min(df$NullESS))/10),color="black")+labs(title="Mean ESS under null", x="Cutoff value for efficacy",y="Cutoff value for futility")
+        Contour.nullESS=Contour.nullESS+
+          geom_path(data = contour_data_tIE_subset_1,
+                    aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_path(data = contour_data_tIE_subset_2, aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_point(data=cleandata,aes(cleandata$eff,cleandata$fut,z=NA),color="black")+
+          geom_point(data=nextcutoff.predict,aes(x=nextcutoff.predict$eff,y=nextcutoff.predict$fut,z=NA),color="pink")
+
+        df=data.frame(AltESS=prediction$yhat.ESS.alt,eff=xgrid.eff,fut=xgrid.fut)
+        Contour.altESS<-ggplot(df,aes(x=df$eff,y=df$fut,z=df$AltESS))+
+          scale_fill_gradientn(colors = colormap)+geom_tile(aes(fill=df$AltESS))+
+          geom_contour(breaks=seq(min(df$AltESS),max(df$AltESS),by=(max(df$AltESS)-min(df$AltESS))/10),color="black")+labs(title="Mean ESS under alternative", x="Cutoff value for efficacy",y="Cutoff value for futility")
+        Contour.altESS=Contour.altESS+
+          geom_path(data = contour_data_tIE_subset_1,
+                    aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_path(data = contour_data_tIE_subset_2, aes(contour_data_tIE_subset_2$x,contour_data_tIE_subset_2$y,z=NA),color="white",linewidth=1.1)+
+          geom_point(data=cleandata,aes(cleandata$eff,cleandata$fut,z=NA),color="black")+
+          geom_point(data=nextcutoff.predict,aes(x=nextcutoff.predict$eff,y=nextcutoff.predict$fut,z=NA),color="pink")
+        # Plot these figures
+        ggarrange(Contour.tIE,Contour.pow,Contour.nullESS,Contour.altESS,Contour.sd,ncol = 2,nrow=3)
       }
       # Need to add a early stop criteria discuss with Dave on 05/09/2023
     }

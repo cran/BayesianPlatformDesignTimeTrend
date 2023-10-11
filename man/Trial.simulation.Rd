@@ -15,10 +15,9 @@ Trial.simulation(
     = "main", variable.inf = "Fixeffect")), Stopbound.inf = Stopboundinf(Stop.type =
     "Early-Pocock", Boundary.type = "Symmetric", 
      cutoff = c(0.99, 0.01)),
-    Random.inf = list(Fixratio = FALSE, Fixratiocontrol = NA, BARmethod = "Thall",
-    Thall.tuning.inf = list(tuningparameter = "Fixed", fixvalue = 1), Trippa.tuning.inf =
-    list(a = 10, b = 0.75)), trend.inf = list(trend.type = "step", trend.effect = c(0,
-    0), trend_add_or_multip = "mult")),
+    Random.inf = list(Fixratio = TRUE, Fixratiocontrol = 1, BARmethod = NA,
+    Thall.tuning.inf = NA, Trippa.tuning.inf = NA), trend.inf = list(trend.type = "step",
+    trend.effect = c(0, 0), trend_add_or_multip = "mult")),
   cl = 2
 )
 }

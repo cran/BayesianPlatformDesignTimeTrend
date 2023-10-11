@@ -1,4 +1,6 @@
-#' Title
+#' @title testing_and_armdropping
+#' @description This function makes a decision on whether any active arm should be dropped based on posterior probability and
+#'     return the vector of decision on each arm, the vector of active arms index and the number of arms left for further study.
 #'
 #' @param post.prob.btcontrol A numeric vector of posterior probability of each treatment arm better than control
 #' @param group A numeric value. The current stage index.

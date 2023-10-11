@@ -96,6 +96,8 @@ simulatetrial <- function(ii,
   Random.inf = Randomisation.inf(Random.inf)
   Fixratio = Random.inf$Fixratio
   Fixratiocontrol = Random.inf$Fixratiocontrol
+  if (!is.logical(Fixratio)) stop("Error: Fixratio should be a logical value (TRUE/FALSE)")
+  if (isTRUE(Fixratio) & !is.numeric(Fixratiocontrol)) stop("Error: Fixratiocontrol argument should be numeric for fix ratio approach")
   BARmethod = Random.inf$BARmethod
   #List of information required for Thall's approach
   Thall.tuning.inf = Random.inf$Thall.tuning.inf
@@ -323,23 +325,25 @@ simulatetrial <- function(ii,
         armleft = test_drop.inf$armleft
         treatmentindex = test_drop.inf$treatmentindex
       }
-      randomprob = ARmethod(
-        Fixratio,
-        BARmethod,
-        group,
-        stats,
-        post.prob.btcontrol,
-        K,
-        n,
-        tuningparameter,
-        c,
-        a,
-        b,
-        post.prob.best,
-        max.ar,
-        armleft,
-        treatmentindex
-      )
+      if (isFALSE(Fixratio)) {
+        #-Adjust the posterior randomisation ratio-
+        randomprob = ARmethod(
+          BARmethod,
+          group,
+          stats,
+          post.prob.btcontrol,
+          K,
+          n,
+          tuningparameter,
+          c,
+          a,
+          b,
+          post.prob.best,
+          max.ar,
+          armleft,
+          treatmentindex
+        )
+      }
     }
     else if (model.inf$model == "tlr") {
       stan.data.temp = stan.logisticmodeltrans(
@@ -504,25 +508,25 @@ simulatetrial <- function(ii,
         armleft = test_drop.inf$armleft
         treatmentindex = test_drop.inf$treatmentindex
       }
-
-      #-Adjust the posterior randomisation ratio-
-      randomprob = ARmethod(
-        Fixratio,
-        BARmethod,
-        group,
-        stats,
-        post.prob.btcontrol,
-        K,
-        n,
-        tuningparameter,
-        c,
-        a,
-        b,
-        post.prob.best,
-        max.ar,
-        armleft,
-        treatmentindex
-      )
+      if (isFALSE(Fixratio)) {
+        #-Adjust the posterior randomisation ratio-
+        randomprob = ARmethod(
+          BARmethod,
+          group,
+          stats,
+          post.prob.btcontrol,
+          K,
+          n,
+          tuningparameter,
+          c,
+          a,
+          b,
+          post.prob.best,
+          max.ar,
+          armleft,
+          treatmentindex
+        )
+      }
     }
     stats[group,] = c(stats1, stats2, stats3, round(statsbeta0, 3), stats4, stats5, stats6, stats7)
     if (armleft == 1) {
