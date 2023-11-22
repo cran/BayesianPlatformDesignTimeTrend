@@ -100,7 +100,9 @@ Trial.simulation = function(ntrials = 5000,
   result = {
 
   }
+  message("Trial information initialisation done")
   #-----------------------------------------
+  message("Start trial simulation")
   result = foreach(icount(ntrials)) %dopar% trial.fun(
     response.probs = input.info$response.probs,
     test.type = input.info$test.type,
@@ -113,6 +115,7 @@ Trial.simulation = function(ntrials = 5000,
     Random.inf = input.info$Random.inf,
     trend.inf = input.info$trend.inf
   )
+  message("Trial simulation done")
   #Save output data
   FWER = conjuncativepower_or_FWER(result,input.info$response.probs,test.type = input.info$test.type)
   TIE_POWER = rbind(TIE_POWER, FWER)

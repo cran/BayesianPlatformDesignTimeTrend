@@ -108,19 +108,38 @@ conjuncativepower_or_FWER=function(res,scenario,test.type){
     #   Stop("Input test.type is invalid.")
     # }
     #Identify which hypothesis is rejected
-    reject = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                            K - 1), arr.ind = TRUE)[,2]
-    drop.at = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                             K - 1), arr.ind = TRUE)[, 1]
-    drop.at.all=rep(stage,K-1)
-    drop.at.all[reject]=drop.at
-    treatmentindex=seq(1,K-1)
-    trtmean.loc=cbind(drop.at.all,treatmentindex)
-
-    res=matrix(x[,(K-1+2*K+1):(K-1+2*K+K-1)] %in% 1,ncol=K-1)
-    result=rep(NA,K-1)
-    for (i in 1:(K-1)){
-      result[i] = res[trtmean.loc[i,1],trtmean.loc[i,2]]
+    test.data = x[,(K-1+2*K+1):(K-1+2*K+K-1)]
+    drop.at.mat = which(matrix((test.data %in% NA),ncol = K-1), arr.ind = TRUE)
+    if (length(drop.at.mat)>=1){
+      # Find unique column indices
+      unique_cols <- unique(drop.at.mat[, 2])
+      drop.at.all=rep(stage,K-1)
+      treatmentindex=seq(1,K-1)
+      # Initialize a result matrix
+      trtmean.loc <- matrix(NA, nrow = length(unique_cols), ncol = 2)
+      colnames(trtmean.loc) <- c("drop.at.all", "treatmentindex")
+      # Iterate through unique column indices
+      for (i in 1:length(unique_cols)) {
+        trtdrop <- unique_cols[i]
+        drop.at <- min(drop.at.mat[drop.at.mat[, 2] == trtdrop, 1]) - 1
+        drop.at.all[trtdrop]=drop.at
+      }
+      trtmean.loc=cbind(c(max(drop.at.all),drop.at.all),c(1,treatmentindex+1))
+      res=matrix(x[,(K-1+2*K+1):(K-1+2*K+K-1)] %in% 1,ncol=K-1)
+      result=rep(NA,K-1)
+      for (i in 1:(K-1)){
+        result[i] = res[trtmean.loc[i+1,1],trtmean.loc[i+1,2]-1]
+      }
+    }
+    else{
+      drop.at.all=rep(stage,K)
+      treatmentindex=seq(1,K-1)
+      trtmean.loc=cbind(drop.at.all,c(1,treatmentindex+1))
+      res=matrix(x[,(K-1+2*K+1):(K-1+2*K+K-1)] %in% 1,ncol=K-1)
+      result=rep(NA,K-1)
+      for (i in 1:(K-1)){
+        result[i]=res[trtmean.loc[i+1,1],trtmean.loc[i+1,2]-1]
+      }
     }
     if (sum(result == sce) == (K-1)){
       return(1)
@@ -131,13 +150,13 @@ conjuncativepower_or_FWER=function(res,scenario,test.type){
   }))
   if (test.type == "Twoside"){
     if (sum(scenario-min(scenario))>0){
-    current_scenario = "Alt"
-    return(hypres)
-  }
-  else{
-    current_scenario = "Null"
-    return(1-hypres)
-  }
+      current_scenario = "Alt"
+      return(hypres)
+    }
+    else{
+      current_scenario = "Null"
+      return(1-hypres)
+    }
   }
   else{
     if ((max(scenario)-scenario[1]) <= 0){
@@ -149,9 +168,7 @@ conjuncativepower_or_FWER=function(res,scenario,test.type){
       return(hypres)
     }
   }
-
 }
-
 #' @title Meanfunc
 #' @description This function reads in the output matrix of a number of trial replicates to calculate mean treatment effect estimate.
 #' @param res A list of output matrix of a number of trial replicates
@@ -166,40 +183,52 @@ Meanfunc = function(res) {
     K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
-  meaneffect = colMeans(matrix(t(sapply(res, function(x) {
-    stage = dim(x)[1]
-    resname = colnames(x)
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
-    reject = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                            K - 1), arr.ind = TRUE)[,2]
-    if (length(reject) >= 1) {
-      drop.at = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                               K - 1), arr.ind = TRUE)[, 1]
-      drop.at.all = rep(stage, K - 1)
-      drop.at.all[reject] = drop.at
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(drop.at.all, treatmentindex)
+  meaneffect = colMeans(matrix(t(sapply(res,function(x){
+    stage=dim(x)[1]
+    resname=colnames(x)
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
+
+    test.data = x[,(K-1+2*K+1):(K-1+2*K+K-1)]
+    drop.at.mat = which(matrix((test.data %in% NA),ncol = K-1), arr.ind = TRUE)
+
+
+    if (length(drop.at.mat)>=1){
+      # Find unique column indices
+      unique_cols <- unique(drop.at.mat[, 2])
+      drop.at.all=rep(stage,K-1)
+      treatmentindex=seq(1,K-1)
+      # Initialize a result matrix
+      trtmean.loc <- matrix(NA, nrow = length(unique_cols), ncol = 2)
+      colnames(trtmean.loc) <- c("drop.at.all", "treatmentindex")
+
+      # Iterate through unique column indices
+      for (i in 1:length(unique_cols)) {
+        trtdrop <- unique_cols[i]
+        drop.at <- min(drop.at.mat[drop.at.mat[, 2] == trtdrop, 1]) - 1
+        drop.at.all[trtdrop]=drop.at
+      }
+      trtmean.loc=cbind(c(max(drop.at.all),drop.at.all),c(1,treatmentindex+1))
       meanres = matrix(x[, (K - 1 + 2 * K + K - 1 + 1 + 1):(K - 1 + 2 *
                                                               K + K - 1 + 1 + K - 1)], ncol = K - 1)
       result = rep(NA, K - 1)
       for (i in 1:(K - 1)) {
-        result[i] = meanres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+        result[i] = meanres[trtmean.loc[i+1, 1], trtmean.loc[i+1, 2]-1]
       }
       return(result)
     }
     else{
-      drop.at.all = rep(stage, K - 1)
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(drop.at.all, treatmentindex)
+      drop.at.all=rep(stage,K)
+      treatmentindex=seq(1,K-1)
+      trtmean.loc=cbind(drop.at.all,c(1,treatmentindex+1))
       meanres = matrix(x[, (K - 1 + 2 * K + K - 1 + 1 + 1):(K - 1 + 2 *
                                                               K + K - 1 + 1 + K - 1)], ncol = K - 1)
       result = rep(NA, K - 1)
       for (i in 1:(K - 1)) {
-        result[i] = meanres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+        result[i] = meanres[trtmean.loc[i+1, 1], trtmean.loc[i+1, 2]-1]
       }
       return(result)
     }
-  })), ncol = K - 1))
+  })),ncol = K-1))
   return(meaneffect)
 }
 #' @title varfunc
@@ -216,40 +245,52 @@ varfunc = function(res) {
     K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
-  meaneffect = matrixStats::colVars(matrix(t(sapply(res, function(x) {
-    stage = dim(x)[1]
-    resname = colnames(x)
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
-    reject = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                            K - 1), arr.ind = TRUE)[,2]
-    if (length(reject) >= 1) {
-      drop.at = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                               K - 1), arr.ind = TRUE)[, 1]
-      drop.at.all = rep(stage, K - 1)
-      drop.at.all[reject] = drop.at
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(drop.at.all, treatmentindex)
-      meanres = matrix(x[, (K - 1 + 2 * K + K - 1 + 1 + 1):(K - 1 + 2 *
-                                                              K + K - 1 + 1 + K - 1)], ncol = K - 1)
-      result = rep(NA, K - 1)
-      for (i in 1:(K - 1)) {
-        result[i] = meanres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+  meaneffect = matrixStats::colVars(matrix(t(sapply(res,function(x){
+      stage=dim(x)[1]
+      resname=colnames(x)
+      K=sum(stringr::str_detect(colnames(x),"H"))+1
+
+      test.data = x[,(K-1+2*K+1):(K-1+2*K+K-1)]
+      drop.at.mat = which(matrix((test.data %in% NA),ncol = K-1), arr.ind = TRUE)
+
+
+      if (length(drop.at.mat)>=1){
+        # Find unique column indices
+        unique_cols <- unique(drop.at.mat[, 2])
+        drop.at.all=rep(stage,K-1)
+        treatmentindex=seq(1,K-1)
+        # Initialize a result matrix
+        trtmean.loc <- matrix(NA, nrow = length(unique_cols), ncol = 2)
+        colnames(trtmean.loc) <- c("drop.at.all", "treatmentindex")
+
+        # Iterate through unique column indices
+        for (i in 1:length(unique_cols)) {
+          trtdrop <- unique_cols[i]
+          drop.at <- min(drop.at.mat[drop.at.mat[, 2] == trtdrop, 1]) - 1
+          drop.at.all[trtdrop]=drop.at
+        }
+        trtmean.loc=cbind(c(max(drop.at.all),drop.at.all),c(1,treatmentindex+1))
+        meanres = matrix(x[, (K - 1 + 2 * K + K - 1 + 1 + 1):(K - 1 + 2 *
+                                                                K + K - 1 + 1 + K - 1)], ncol = K - 1)
+        result = rep(NA, K - 1)
+        for (i in 1:(K - 1)) {
+          result[i] = meanres[trtmean.loc[i+1, 1], trtmean.loc[i+1, 2]-1]
+        }
+        return(result)
       }
-      return(result)
-    }
-    else{
-      drop.at.all = rep(stage, K - 1)
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(drop.at.all, treatmentindex)
-      meanres = matrix(x[, (K - 1 + 2 * K + K - 1 + 1 + 1):(K - 1 + 2 *
-                                                              K + K - 1 + 1 + K - 1)], ncol = K - 1)
-      result = rep(NA, K - 1)
-      for (i in 1:(K - 1)) {
-        result[i] = meanres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+      else{
+        drop.at.all=rep(stage,K)
+        treatmentindex=seq(1,K-1)
+        trtmean.loc=cbind(drop.at.all,c(1,treatmentindex+1))
+        meanres = matrix(x[, (K - 1 + 2 * K + K - 1 + 1 + 1):(K - 1 + 2 *
+                                                                K + K - 1 + 1 + K - 1)], ncol = K - 1)
+        result = rep(NA, K - 1)
+        for (i in 1:(K - 1)) {
+          result[i] = meanres[trtmean.loc[i+1, 1], trtmean.loc[i+1, 2]-1]
+        }
+        return(result)
       }
-      return(result)
-    }
-  })), ncol = K - 1))
+    })),ncol = K-1))
   return(meaneffect)
 }
 
@@ -262,44 +303,58 @@ varfunc = function(res) {
 #'
 #' @examples
 #' \dontrun{Nfunc(res)}
-Nfunc = function(res) {
+#'
+Nfunc=function(res){
   K=mean(sapply(res,function(x){
     K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
-  Nmean = colMeans(matrix(t(sapply(res, function(x) {
-    stage = dim(x)[1]
-    resname = colnames(x)
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
-    reject = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                            K - 1), arr.ind = TRUE)[,2]
-    if (length(reject) >= 1) {
-      drop.at = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                               K - 1), arr.ind = TRUE)[, 1]
-      drop.at.all = rep(stage, K - 1)
-      drop.at.all[reject] = drop.at
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(c(max(drop.at.all), drop.at.all), c(1, treatmentindex +
-                                                                1))
-      Nres = matrix(x[, seq(K, K - 1 + 2 * K - 1, 2)], ncol = K)
-      result = rep(NA, K)
-      for (i in 1:K) {
-        result[i] = Nres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+  Nmean=colMeans(matrix(t(sapply(res,function(x){
+    stage=dim(x)[1]
+    resname=colnames(x)
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
+
+    test.data = x[,(K-1+2*K+1):(K-1+2*K+K-1)]
+    drop.at.mat = which(matrix((test.data %in% NA),ncol = K-1), arr.ind = TRUE)
+
+
+    if (length(drop.at.mat)>=1){
+      # Find unique column indices
+      unique_cols <- unique(drop.at.mat[, 2])
+      drop.at.all=rep(stage,K-1)
+      treatmentindex=seq(1,K-1)
+      # Initialize a result matrix
+      trtmean.loc <- matrix(NA, nrow = length(unique_cols), ncol = 2)
+      colnames(trtmean.loc) <- c("drop.at.all", "treatmentindex")
+
+      # Iterate through unique column indices
+      for (i in 1:length(unique_cols)) {
+        trtdrop <- unique_cols[i]
+        drop.at <- min(drop.at.mat[drop.at.mat[, 2] == trtdrop, 1]) - 1
+        drop.at.all[trtdrop]=drop.at
+      }
+      trtmean.loc=cbind(c(max(drop.at.all),drop.at.all),c(1,treatmentindex+1))
+      Nres=matrix(x[,seq(K,K-1+2*K-1,2)],ncol = K)
+      result=rep(NA,K)
+      for (i in 1:K){
+        result[i]=Nres[trtmean.loc[i,1],trtmean.loc[i,2]]
       }
       return(result)
     }
     else{
-      drop.at.all = rep(stage, K)
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(drop.at.all, c(1, treatmentindex + 1))
-      Nres = matrix(x[, seq(K, K - 1 + 2 * K - 1, 2)], ncol = K)
-      result = rep(NA, K)
-      for (i in 1:K) {
-        result[i] = Nres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+      drop.at.all=rep(stage,K)
+      treatmentindex=seq(1,K-1)
+      trtmean.loc=cbind(drop.at.all,c(1,treatmentindex+1))
+      Nres=matrix(x[,seq(K,K-1+2*K-1,2)],ncol = K)
+      result=rep(NA,K)
+      for (i in 1:K){
+        result[i]=Nres[trtmean.loc[i,1],trtmean.loc[i,2]]
       }
       return(result)
     }
-  })), ncol = K))
+
+
+  })),ncol = K))
   return(Nmean)
 }
 
@@ -317,39 +372,52 @@ Sperarmfunc = function(res) {
     K=sum(stringr::str_detect(colnames(x),"H"))+1
     return(K)
   }))
-  Smean = colMeans(matrix(t(sapply(res, function(x) {
-    stage = dim(x)[1]
-    resname = colnames(x)
-    K = sum(stringr::str_detect(colnames(x), "H")) + 1
-    reject = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                            K - 1), arr.ind = TRUE)[,2]
-    if (length(reject) >= 1) {
-      drop.at = which(matrix(x[, (K - 1 + 2 * K + 1):(K - 1 + 2 * K + K - 1)] %in% 1, ncol =
-                               K - 1), arr.ind = TRUE)[, 1]
-      drop.at.all = rep(stage, K - 1)
-      drop.at.all[reject] = drop.at
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(c(max(drop.at.all), drop.at.all), c(1, treatmentindex +
-                                                                1))
-      Nres = matrix(x[, seq(K + 1, K - 1 + 2 * K, 2)], ncol = K)
-      result = rep(NA, K)
-      for (i in 1:K) {
-        result[i] = Nres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+  Smean = colMeans(matrix(t(sapply(res,function(x){
+    stage=dim(x)[1]
+    resname=colnames(x)
+    K=sum(stringr::str_detect(colnames(x),"H"))+1
+
+    test.data = x[,(K-1+2*K+1):(K-1+2*K+K-1)]
+    drop.at.mat = which(matrix((test.data %in% NA),ncol = K-1), arr.ind = TRUE)
+
+
+    if (length(drop.at.mat)>=1){
+      # Find unique column indices
+      unique_cols <- unique(drop.at.mat[, 2])
+      drop.at.all=rep(stage,K-1)
+      treatmentindex=seq(1,K-1)
+      # Initialize a result matrix
+      trtmean.loc <- matrix(NA, nrow = length(unique_cols), ncol = 2)
+      colnames(trtmean.loc) <- c("drop.at.all", "treatmentindex")
+
+      # Iterate through unique column indices
+      for (i in 1:length(unique_cols)) {
+        trtdrop <- unique_cols[i]
+        drop.at <- min(drop.at.mat[drop.at.mat[, 2] == trtdrop, 1]) - 1
+        drop.at.all[trtdrop]=drop.at
+      }
+      trtmean.loc=cbind(c(max(drop.at.all),drop.at.all),c(1,treatmentindex+1))
+      Nres=matrix(x[, seq(K + 1, K - 1 + 2 * K, 2)], ncol = K)
+      result=rep(NA,K)
+      for (i in 1:K){
+        result[i]=Nres[trtmean.loc[i,1],trtmean.loc[i,2]]
       }
       return(result)
     }
     else{
-      drop.at.all = rep(stage, K)
-      treatmentindex = seq(1, K - 1)
-      trtmean.loc = cbind(drop.at.all, c(1, treatmentindex + 1))
-      Nres = matrix(x[, seq(K + 1, K - 1 + 2 * K, 2)], ncol = K)
-      result = rep(NA, K)
-      for (i in 1:K) {
-        result[i] = Nres[trtmean.loc[i, 1], trtmean.loc[i, 2]]
+      drop.at.all=rep(stage,K)
+      treatmentindex=seq(1,K-1)
+      trtmean.loc=cbind(drop.at.all,c(1,treatmentindex+1))
+      Nres=matrix(x[, seq(K + 1, K - 1 + 2 * K, 2)], ncol = K)
+      result=rep(NA,K)
+      for (i in 1:K){
+        result[i]=Nres[trtmean.loc[i,1],trtmean.loc[i,2]]
       }
       return(result)
     }
-  })), ncol = K))
+
+
+  })),ncol = K))
   return(Smean)
 }
 

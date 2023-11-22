@@ -59,7 +59,7 @@ testing_and_armdropping = function(K,
   treatmentdrop = treatmentindex[post.prob.btcontrol > cutoffeff[group] |
                                    post.prob.btcontrol < cutoffful[group]]
   # Delete the arm dropped in this round information
-  post.prob.btcontrol = post.prob.btcontrol = post.prob.btcontrol[!Justify]
+  post.prob.btcontrol = post.prob.btcontrol[!Justify]
 
   stats3 = rep(NA, K - 1)
   names(stats3) = seq(1, K - 1)

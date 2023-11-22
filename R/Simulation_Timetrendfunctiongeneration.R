@@ -38,7 +38,7 @@ Timetrend.fun = function(trend.inf) {
     "linear" = {
       if (sum(trend.effect != 0) > 0) {
         trend.function = function(ns, group , i, trend.effect) {
-          delta = (i - 1 + ns[group] - ns[1]) * trend.effect /  (ns[length(ns)] - 1)
+          delta = (i - 1) * trend.effect /  (ns[length(ns)] - 1)
           return(delta)
         }
         timetrendornot = c("There is time trend during data generation")
@@ -49,8 +49,8 @@ Timetrend.fun = function(trend.inf) {
         trend.function = function(ns, group , i, trend.effect) {
           delta = ifelse(
             group <= round(length(ns) / 2),
-            (i - 1 + ns[group] - ns[1]) * trend.effect /  (ns[length(ns)] - 1),
-            (ns[1] - 1 + ns[round(length(ns) / 2)] - ns[1]) * trend.effect /  (ns[length(ns)] - 1) - (i - 1 + ns[group - round(length(ns) / 2)] - ns[1]) * trend.effect /  (ns[length(ns)] - 1)
+            (i - 1) * trend.effect /  (ns[length(ns)] - 1),
+            (- 1 + ns[round(length(ns) / 2)]) * trend.effect /  (ns[length(ns)] - 1) - (i - 1 - ns[round(length(ns) / 2)]) * trend.effect /  (ns[length(ns)] - 1)
           )
           return(delta)
         }
@@ -60,7 +60,7 @@ Timetrend.fun = function(trend.inf) {
     "plateau" = {
       if (sum(trend.effect != 0) > 0) {
         trend.function = function(ns, group , i, trend.effect) {
-          delta = trend.effect * (i - 1 + ns[group] - ns[1]) / (max(ns) / 10 + (i - 1 + ns[group] - ns[1]))
+          delta = trend.effect * (i - 1) / (max(ns) / 10 + (i - 1))
           return(delta)
         }
         timetrendornot = c("There is time trend during data generation")
