@@ -1,7 +1,7 @@
-3e6a947e793728aa81d9fe436dc0a4d1 *DESCRIPTION
+3c1e843b89a22567c416831a96331fbf *DESCRIPTION
 129d4fd87309c515f421bacb3c869689 *LICENSE
 6914812fd20df551cd07baed73b75938 *NAMESPACE
-6e0a7c5d3586b55fa684b92866bed53c *NEWS.md
+afed614cdf191c7bd04e0f0ae87234a8 *NEWS.md
 d8b01db771023db909b191b701adfc35 *R/Analysis_listofanalysisfunction.R
 ce8b9d0cba696d1950c003d26098a4ab *R/BayesianPlatformDesignTimeTrend-package.R
 bfde611ce0a16d95af96d81976ccd90d *R/Demo_CutoffScreening.R
@@ -23,7 +23,7 @@ f639c5a7ad0b755b789fa9af8f01c1a0 *R/Simulation_Stanlogisticdatatransform.R
 25c6072943623aeebf0f6a53dd2af5b1 *R/Simulation_Stansamplesummary_Mixeffect.R
 0f33f64684f03840d5abc474fd03ea8c *R/Simulation_Stansamplesummarytolist_Fixeffect.R
 6ddaddf1944e14ce2f08bac6f1605f7e *R/Simulation_Stansamplesummarytolist_Mixeffect.R
-0aa39c4299f4f2b79156e1af0087e11e *R/Simulation_Timetrendfunctiongeneration.R
+b49a8c4ee3a6f7b943e1cda65621e76c *R/Simulation_Timetrendfunctiongeneration.R
 a0b95c660fccb8b980cc63f738aa59ba *R/Transferdatatolist_Modelinf.R
 91e1228fccd511a74d26d83d951d0708 *R/Transferdatatolist_Stopboundinf.R
 059f013b9db81990c85cf9c957eb9f76 *R/TrialSimulation.R
@@ -75,7 +75,7 @@ a9182e84ed5a870c4a847e5ea86eeb85 *man/OPC_null.Rd
 ecd80d53b94f61a1dd71669f2814cc16 *man/Save.resulttoRDatafile.Rd
 a3375d4bad556ce52ce758828c3806df *man/Sperarmfunc.Rd
 05f831d2552b4a6020b85f9f3245093a *man/Stopboundinf.Rd
-399be38ac39b1b7845ef62cccdaefe03 *man/Timetrend.fun.Rd
+ce2bb908596cdbb56f03de9e04464daf *man/Timetrend.fun.Rd
 26aef88e216b64a2deb0a991f5c51ff8 *man/Trial.simulation.Rd
 78b82b4265ccf3450ed79c16bc9f3b7d *man/alphaspending.Rd
 b6219feaea630553808168e5a791deeb *man/conjuncativepower_or_FWER.Rd

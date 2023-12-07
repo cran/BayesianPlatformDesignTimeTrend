@@ -1,6 +1,9 @@
+# Dec 07, 2023, BayesianPlatformDesignTimeTrend version 1.2.3
+- This release fixed some bugs.
+- Next version will extend the outcome to normal outcome and use smoothing methods in time trend modelling.
+
 # Nov 19, 2023, BayesianPlatformDesignTimeTrend version 1.2.2
 - This release fixed some bugs and add the bug reporting links.
-- Next version will extend the outcome to normal outcome and use smoothing methods in time trend modelling.
 
 ## Major changes
 - I fixed the error in the time trend generation function `Timetrend.fun`.

@@ -1,6 +1,6 @@
 Package: BayesianPlatformDesignTimeTrend
 Title: Simulate and Analyse Bayesian Platform Trial with Time Trend
-Version: 1.2.2
+Version: 1.2.3
 Author: Ziyan Wang [aut, cre],
   David Woods [ctb]
 Maintainer: Ziyan Wang <zw7g20@soton.ac.uk>
@@ -46,6 +46,6 @@ Suggests: rmarkdown, knitr
 VignetteBuilder: knitr
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2023-11-22 00:23:54 UTC; ziyanwang
+Packaged: 2023-12-07 10:11:18 UTC; ziyanwang
 Repository: CRAN
-Date/Publication: 2023-11-22 01:00:02 UTC
+Date/Publication: 2023-12-07 11:00:02 UTC

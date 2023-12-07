@@ -4,6 +4,8 @@
 #' @param trend.inf The list of information for time trend effect including 'trend.type', 'trend.effect', 'trend_add_or_multip'.
 #'     'trend.type' is the shape of time trend. Default is "step". Other types are "linear", "inverse.U.linear", "plateau".
 #'     "trend.effect" the vector of the strength of time trend for each arm. The first element is for the control arm.
+#'         The value of time trend is the gap between the start of the trial and the end of the trial. The change between each interim or each patient is calculated in the function.
+#'         For example, for linear time trend with trend.effect = c(0.2, 0.2). The trend effect increment in control group for patient $i$ is 0.2(i-1)/(N_max-1), for stage $j$ is 0.2(j-1)/(length(ns)-1).
 #'     "trend_add_or_multip" the pattern of time trend affecting the true response probability. Default is "mult".
 #'
 #' @return A list containing the time trend function according to input trend.type variable,
@@ -29,7 +31,7 @@ Timetrend.fun = function(trend.inf) {
     "step" = {
       if (sum(trend.effect != 0) > 0) {
         trend.function = function(ns, group , i, trend.effect) {
-          delta = (group - 1) * trend.effect
+          delta = (group - 1) * trend.effect/(length(ns)-1)
           return(delta)
         }
         timetrendornot = c("There is time trend during data generation")
@@ -38,7 +40,7 @@ Timetrend.fun = function(trend.inf) {
     "linear" = {
       if (sum(trend.effect != 0) > 0) {
         trend.function = function(ns, group , i, trend.effect) {
-          delta = (i - 1) * trend.effect /  (ns[length(ns)] - 1)
+          delta = (i - 1 + ns[group] - ns[1]) * trend.effect /  (ns[length(ns)] - 1)
           return(delta)
         }
         timetrendornot = c("There is time trend during data generation")
@@ -49,8 +51,9 @@ Timetrend.fun = function(trend.inf) {
         trend.function = function(ns, group , i, trend.effect) {
           delta = ifelse(
             group <= round(length(ns) / 2),
-            (i - 1) * trend.effect /  (ns[length(ns)] - 1),
-            (- 1 + ns[round(length(ns) / 2)]) * trend.effect /  (ns[length(ns)] - 1) - (i - 1 - ns[round(length(ns) / 2)]) * trend.effect /  (ns[length(ns)] - 1)
+            (i - 1 + ns[group] - ns[1]) * trend.effect /  (ns[length(ns)] - 1),
+            (ns[1] - 1 + ns[round(length(ns) / 2)] - ns[1]) * trend.effect /  (ns[length(ns)] - 1) - (i - 1 +
+                                                                                                        ns[group - round(length(ns) / 2)] - ns[1]) * trend.effect /  (ns[length(ns)] - 1)
           )
           return(delta)
         }
@@ -60,7 +63,8 @@ Timetrend.fun = function(trend.inf) {
     "plateau" = {
       if (sum(trend.effect != 0) > 0) {
         trend.function = function(ns, group , i, trend.effect) {
-          delta = trend.effect * (i - 1) / (max(ns) / 10 + (i - 1))
+          delta = trend.effect * (i - 1 + ns[group] - ns[1]) / (max(ns) / 10 + (i -
+                                                                                  1 + ns[group] - ns[1]))
           return(delta)
         }
         timetrendornot = c("There is time trend during data generation")

@@ -10,6 +10,8 @@ Timetrend.fun(trend.inf)
 \item{trend.inf}{The list of information for time trend effect including 'trend.type', 'trend.effect', 'trend_add_or_multip'.
 'trend.type' is the shape of time trend. Default is "step". Other types are "linear", "inverse.U.linear", "plateau".
 "trend.effect" the vector of the strength of time trend for each arm. The first element is for the control arm.
+The value of time trend is the gap between the start of the trial and the end of the trial. The change between each interim or each patient is calculated in the function.
+For example, for linear time trend with trend.effect = c(0.2, 0.2). The trend effect increment in control group for patient $i$ is 0.2(i-1)/(N_max-1), for stage $j$ is 0.2(j-1)/(length(ns)-1).
 "trend_add_or_multip" the pattern of time trend affecting the true response probability. Default is "mult".}
 }
 \value{
